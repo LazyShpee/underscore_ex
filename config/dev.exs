@@ -1,4 +1,7 @@
 import Config
 
 config :logger,
-  level: :debug
+  level: :info
+
+config :underscore_ex,
+  prefix: ">>"
