@@ -48,7 +48,7 @@ defmodule UnderscoreEx.Command.Emoji.Add do
       e ->
         IO.inspect(e)
 
-        "Unknown error occurred. Make you the file isn't too big (256Kb max) and at least one free emoji slot."
+        "Unknown error occurred. Make sure the file isn't too big (256Kb max) and that there is at least one free emoji slot on the target server."
     end
   end
 end

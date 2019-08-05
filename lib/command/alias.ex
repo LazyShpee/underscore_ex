@@ -30,13 +30,18 @@ defmodule UnderscoreEx.Command.Alias do
     end
   end
 
+  defp unescape(stuff) do
+    stuff
+    |> String.replace("::", ";;")
+  end
+
   def resolve(command, nil), do: {:ok, command, command}
 
   def resolve(command, context) do
     destructure([name, rest], command |> String.split(" ", parts: 2, trim: true))
 
     with {:ok, al} <- get(name, Integer.to_string(context)) do
-      {:ok, al.content <> " " <> (rest || ""), name}
+      {:ok, unescape(al.content) <> " " <> (rest || ""), name}
     else
       _ -> {:ok, command, nil}
     end
@@ -131,7 +136,7 @@ defmodule UnderscoreEx.Command.Alias do
         "Set alias `#{name}` to `#{content}`."
       else
         true ->
-          "You can't alias the alias command."
+          "`alias` is a reserved name."
 
         e ->
           IO.inspect(e)

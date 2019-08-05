@@ -2,6 +2,97 @@ defmodule UnderscoreEx.Core do
   @moduledoc false
 
   use GenServer
+  require Logger
+  alias UnderscoreEx.Command
+  alias UnderscoreEx.Util
+
+  # expand(): split -> map(resolve_alias, if resolved, expand) -> flatten
+
+  def expand_commands(line, alias_context, depth \\ 0) do
+    line
+    |> String.split(";;", trim: true)
+    |> Enum.flat_map(fn part ->
+      {:ok, line, _call_name} = part |> Command.Alias.resolve(alias_context)
+
+      cond do
+        part == line -> [line]
+        depth >= 3 -> raise "Too many embedded aliases."
+        true -> expand_commands(line, alias_context, depth + 1)
+      end
+    end)
+  rescue
+    e -> {:error, e.message}
+  end
+
+  def run(message) do
+    context = %{message: message}
+
+    with {:ok, command_line, prefix} <- extract_command(context),
+         commands when is_list(commands) <- expand_commands(command_line, message.guild_id || message.author.id),
+         context <-
+           %{
+             prefix: prefix
+           }
+           |> Enum.into(context),
+         {:ok, result} <-
+           run_commands(commands, context) do
+      result
+      |> Enum.filter(fn r -> is_binary(r) end)
+      |> Enum.map(&String.trim/1)
+      |> Enum.join("\n")
+      |> Util.pipe_message(message)
+    else
+      {:error, <<reason::binary>>} ->
+        "Error: #{reason}" |> Util.pipe_message(message)
+
+      {:error, :not_a_command} ->
+        nil
+
+      {:ok, _type, _item, rest, _depth} ->
+        Logger.warn("Could not find command for '#{rest}'.")
+
+      {:error, :no_command} ->
+        Logger.warn("No executable command for group '#{message.content}'.")
+
+      {:error, :no_commands} ->
+        Logger.error("No commands loaded yet.")
+
+      e ->
+        Logger.warn("Unhandled error: #{inspect(e)}")
+    end
+  end
+
+  def run_commands(commands, context) do
+    commands
+    |> Enum.reduce_while({:ok, []}, fn command, {:ok, acc} ->
+      case run_command(command, context) do
+        {:ok, out} -> {:cont, {:ok, acc ++ [out]}}
+        e -> {:halt, e}
+      end
+    end)
+  end
+
+  def run_command(command, context) do
+    with {:ok, type, item, rest, depth} when depth > 0 <-
+           find_command_or_group(command),
+         call_name <-
+           String.slice(command, 0..(-String.length(rest) - 1)) |> String.trim(),
+         {:ok, command} <- get_command(item),
+         context <-
+           %{
+             rest: rest,
+             self: {type, item, depth},
+             call_name: call_name,
+             unaliased_call_name: call_name
+           }
+           |> Enum.into(context),
+         {:ok} <- command.predicates |> check_predicates(context),
+         args <- command.parse_args(rest) do
+      {:ok, apply(command, :call, [context, args])}
+    end
+  rescue
+    e -> {:error, e}
+  end
 
   def find_command_or_group(query) do
     state = get_state()
@@ -25,12 +116,6 @@ defmodule UnderscoreEx.Core do
   def get_command(%{command: command}) when not is_nil(command), do: {:ok, command}
   def get_command(%{}), do: {:error, :no_command}
   def get_command(command), do: {:ok, command}
-
-  def run_command(command, args) do
-    {:ok, apply(command, :call, args)}
-  rescue
-    e -> {:error, e}
-  end
 
   def check_predicates(predicates, context) do
     predicates
@@ -61,7 +146,7 @@ defmodule UnderscoreEx.Core do
 
     case prefix do
       nil -> {:error, :not_a_command}
-      _ -> {:ok, message.content |> String.slice(String.length(prefix)..-1), normal_prefix}
+      _ -> {:ok, message.content |> String.slice(String.length(prefix)..-1) |> String.trim, normal_prefix}
     end
   end
 
