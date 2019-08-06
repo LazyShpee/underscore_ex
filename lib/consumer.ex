@@ -32,6 +32,7 @@ defmodule UnderscoreEx.Consumer do
         }),
       "emoji" =>
         group(%{
+          "list" => Command.Emoji.List,
           "add" => Command.Emoji.Add,
           "delete" => Command.Emoji.Delete,
           "move" => Command.Emoji.Move,

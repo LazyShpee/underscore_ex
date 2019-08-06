@@ -243,5 +243,18 @@ defmodule UnderscoreEx.Util do
     union(user_perms, required_perms) == Enum.sort(required_perms)
   end
 
-  def pipe_message(stuff, where), do: Api.create_message(where, stuff)
+  def escape_discord(str) do
+    ~W(\\ * _ ~ > <)
+    |> Enum.reduce(str, fn s, acc -> acc |> String.replace(s, "\\#{s}") end)
+  end
+
+  def chunk(content, max_size \\ 2000), do: Regex.scan(~r/.{1,#{max_size}}(?:\n|$)/ms, content)
+
+  def pipe_message(stuff, where) when is_binary(stuff),
+    do:
+      stuff
+      |> chunk()
+      |> Enum.map(&Api.create_message(where, &1 |> Enum.at(0) |> String.trim()))
+
+  def pipe_message(stuff, where) when is_binary(stuff), do: Api.create_message!(where, stuff)
 end

@@ -68,7 +68,7 @@ defmodule UnderscoreEx.Command.HelpTree do
       else
         String.slice(query, 0..(-String.length(result |> elem(3)) - 1))
         |> String.trim()
-        |> String.replace(" ", "/")
+        |> String.replace(~r" +", "/")
       end
 
     with {:ok, :group, group, _rest, _depth} <- result do

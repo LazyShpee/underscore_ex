@@ -8,9 +8,32 @@ defmodule UnderscoreEx.Core do
 
   # expand(): split -> map(resolve_alias, if resolved, expand) -> flatten
 
+  @escaper "\\"
+  defp split_commands(str, splitter \\ ";;") do
+    subs =
+      [@escaper, splitter]
+      |> Enum.with_index()
+      |> Enum.map(&{elem(&1, 0), List.to_string([elem(&1, 1) + 1])})
+
+    subs
+    |> Enum.reduce(str, fn {o, r}, acc ->
+      acc
+      |> String.replace("#{@escaper}#{o}", r)
+    end)
+    |> String.split(";;", trim: true)
+    |> Enum.map(fn e ->
+      subs
+      |> Enum.reduce(e, fn {o, r}, acc ->
+        acc
+        |> String.replace(r, o)
+        |> String.trim()
+      end)
+    end)
+  end
+
   def expand_commands(line, alias_context, depth \\ 0) do
     line
-    |> String.split(";;", trim: true)
+    |> split_commands()
     |> Enum.flat_map(fn part ->
       {:ok, line, _call_name} = part |> Command.Alias.resolve(alias_context)
 
@@ -28,7 +51,8 @@ defmodule UnderscoreEx.Core do
     context = %{message: message}
 
     with {:ok, command_line, prefix} <- extract_command(context),
-         commands when is_list(commands) <- expand_commands(command_line, message.guild_id || message.author.id),
+         commands when is_list(commands) <-
+           expand_commands(command_line, message.guild_id || message.author.id),
          context <-
            %{
              prefix: prefix
@@ -145,8 +169,12 @@ defmodule UnderscoreEx.Core do
       end)
 
     case prefix do
-      nil -> {:error, :not_a_command}
-      _ -> {:ok, message.content |> String.slice(String.length(prefix)..-1) |> String.trim, normal_prefix}
+      nil ->
+        {:error, :not_a_command}
+
+      _ ->
+        {:ok, message.content |> String.slice(String.length(prefix)..-1) |> String.trim(),
+         normal_prefix}
     end
   end
 
