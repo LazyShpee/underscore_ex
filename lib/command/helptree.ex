@@ -59,7 +59,7 @@ defmodule UnderscoreEx.Command.HelpTree do
   end
 
   @impl true
-  def call(_context, query) do
+  def call(context, query) do
     result = Core.find_command_or_group(query)
 
     call_name =
@@ -78,7 +78,10 @@ defmodule UnderscoreEx.Command.HelpTree do
           ascii: true,
           filter: fn entries ->
             entries
-            |> Enum.sort(fn {_, a}, {_, b} -> a < b end)
+            |> Enum.filter(fn
+              {_, data} -> Core.check_predicates(data, context) == {:ok}
+            end)
+            |> Enum.sort(fn {a, _}, {b, _} -> a < b end)
           end
         )
         |> Enum.join("\n")

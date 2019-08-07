@@ -31,18 +31,23 @@ defmodule UnderscoreEx.Core do
     end)
   end
 
+  @stop_at ["alias"]
   def expand_commands(line, alias_context, depth \\ 0) do
-    line
-    |> split_commands()
-    |> Enum.flat_map(fn part ->
-      {:ok, line, _call_name} = part |> Command.Alias.resolve(alias_context)
+    if @stop_at |> Enum.find(fn s -> line |> String.starts_with?(s) end) do
+      [line]
+    else
+      line
+      |> split_commands()
+      |> Enum.flat_map(fn part ->
+        {:ok, line, _call_name} = part |> Command.Alias.resolve(alias_context)
 
-      cond do
-        part == line -> [line]
-        depth >= 3 -> raise "Too many embedded aliases."
-        true -> expand_commands(line, alias_context, depth + 1)
-      end
-    end)
+        cond do
+          part == line -> [line]
+          depth >= 3 -> raise "Too many embedded aliases."
+          true -> expand_commands(line, alias_context, depth + 1)
+        end
+      end)
+    end
   rescue
     e -> {:error, e.message}
   end
@@ -141,7 +146,7 @@ defmodule UnderscoreEx.Core do
   def get_command(%{}), do: {:error, :no_command}
   def get_command(command), do: {:ok, command}
 
-  def check_predicates(predicates, context) do
+  def check_predicates(predicates, context) when is_list(predicates) do
     predicates
     |> Enum.reduce_while(:passthrough, fn pred, _acc ->
       case pred.(context) do
@@ -152,6 +157,13 @@ defmodule UnderscoreEx.Core do
     |> case do
       :passthrough -> {:ok}
       e -> e
+    end
+  end
+
+  def check_predicates(command, context) do
+    with {:ok, command} <- get_command(command) do
+      apply(command, :predicates, [])
+      |> check_predicates(context)
     end
   end
 
@@ -178,11 +190,13 @@ defmodule UnderscoreEx.Core do
     end
   end
 
-  def group(commands, command \\ UnderscoreEx.Command.GroupHelper) do
-    %{
-      commands: commands,
-      command: command
-    }
+  defmacro group(commands, command \\ UnderscoreEx.Command.GroupHelper) do
+    quote do
+      %{
+        commands: unquote(commands),
+        command: unquote(command)
+      }
+    end
   end
 
   def get_state() do

@@ -236,18 +236,34 @@ defmodule UnderscoreEx.Util do
   end
 
   def has_permissions?(user_perms, required_perms, :any) do
-    length(union(user_perms, required_perms) > 0)
+    length(union(user_perms, required_perms)) > 0
   end
 
   def has_permissions?(user_perms, required_perms, :all) do
     union(user_perms, required_perms) == Enum.sort(required_perms)
   end
 
+  @discord_special_chars ~W(\ * _ ~ ` > <)
+
+  @doc """
+  Escapes some of discords markdown symbols
+  """
   def escape_discord(str) do
-    ~W(\\ * _ ~ > <)
+    @discord_special_chars
     |> Enum.reduce(str, fn s, acc -> acc |> String.replace(s, "\\#{s}") end)
   end
 
+  @doc """
+  Unescapes some of discords markdown symbols
+  """
+  def unescape_discord(str) do
+    @discord_special_chars
+    |> Enum.reduce(str, fn s, acc -> acc |> String.replace("\\#{s}", s) end)
+  end
+
+  @doc """
+  Lazily split a string into chunks of max_size at line feeds
+  """
   def chunk(content, max_size \\ 2000), do: Regex.scan(~r/.{1,#{max_size}}(?:\n|$)/ms, content)
 
   def pipe_message(stuff, where) when is_binary(stuff),
@@ -256,5 +272,5 @@ defmodule UnderscoreEx.Util do
       |> chunk()
       |> Enum.map(&Api.create_message(where, &1 |> Enum.at(0) |> String.trim()))
 
-  def pipe_message(stuff, where) when is_binary(stuff), do: Api.create_message!(where, stuff)
+  def pipe_message(stuff, where), do: Api.create_message!(where, stuff)
 end

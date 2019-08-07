@@ -10,15 +10,17 @@ defmodule UnderscoreEx.Consumer do
     Consumer.start_link(__MODULE__, max_restarts: 0)
   end
 
-  def handle_event({:MESSAGE_CREATE, %{author: %{bot: bot}} = message, _ws_state})
+  def my_handle_event({:MESSAGE_CREATE, %{author: %{bot: bot}} = message, _ws_state})
       when bot != true do
     Core.run(message)
   end
 
-  def handle_event({:READY, _, _ws_state}) do
-    import UnderscoreEx.Core, only: [group: 1]
+  def my_handle_event({:READY, _, _ws_state}) do
+    import UnderscoreEx.Core
 
     %{
+      "latex" => Command.Latex,
+      "test" => Command.Test,
       "echo" => Command.Echo,
       "helptree" => Command.HelpTree,
       "help" => Command.HelpTree,
@@ -52,7 +54,7 @@ defmodule UnderscoreEx.Consumer do
               "remove" =>
                 group(%{
                   "guild" => Command.Emoji.Network.Remove.Guild
-                  # "manager" => Null
+                  # "manager" => Command.Emoji.Network.Remove.Manager
                 })
             })
         })
@@ -60,7 +62,12 @@ defmodule UnderscoreEx.Consumer do
     |> Core.put_commands()
   end
 
-  def handle_event(_event) do
+  def my_handle_event(_event)do
     :noop
+  end
+
+  def handle_event({type, data, _ws_state} = event) do
+    Core.EventRegistry.dispatch([{:discord, {type, data}}])
+    my_handle_event(event)
   end
 end

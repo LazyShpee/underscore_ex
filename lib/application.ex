@@ -9,6 +9,7 @@ defmodule UnderscoreEx.Application do
     children =
       [
         UnderscoreEx.Repo,
+        UnderscoreEx.Core.EventRegistry,
         UnderscoreEx.Core
       ] ++
         for i <- 1..System.schedulers_online(), do: Supervisor.child_spec({Consumer, []}, id: i)
