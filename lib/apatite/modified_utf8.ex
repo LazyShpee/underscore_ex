@@ -31,20 +31,25 @@ defmodule Apatite.ModifiedUTF8 do
   end
 
   defp read_utf(
-        <<0b110::size(3), a::size(5), 0b10::size(2), b::size(6), rest::binary>>,
-        acc,
-        bytes
-      ) do
+         <<0b110::size(3), a::size(5), 0b10::size(2), b::size(6), rest::binary>>,
+         acc,
+         bytes
+       ) do
     read_utf(rest, acc <> <<0b110::size(3), a::size(5), 0b10::size(2), b::size(6)>>, bytes - 2)
   end
 
   defp read_utf(
-        <<0b1110::size(4), a::size(4), 0b10::size(2), b::size(6), 0b10::size(2), c::size(6),
-          rest::binary>>,
-        acc,
-        bytes
-      ) do
-    read_utf(rest, acc <> <<0b1110::size(4), a::size(4), 0b10::size(2), b::size(6), 0b10::size(2), c::size(6)>>, bytes - 3)
+         <<0b1110::size(4), a::size(4), 0b10::size(2), b::size(6), 0b10::size(2), c::size(6),
+           rest::binary>>,
+         acc,
+         bytes
+       ) do
+    read_utf(
+      rest,
+      acc <>
+        <<0b1110::size(4), a::size(4), 0b10::size(2), b::size(6), 0b10::size(2), c::size(6)>>,
+      bytes - 3
+    )
   end
 
   def read_all(_data, _acc \\ [], _types)

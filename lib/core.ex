@@ -92,7 +92,8 @@ defmodule UnderscoreEx.Core do
         Logger.error("No commands loaded yet.")
 
       {:error, e, stack} ->
-        Logger.error("Runtime error: #{inspect e}\n\n#{Exception.format_stacktrace stack}")
+        Logger.error("Runtime error: #{inspect(e)}\n\n#{Exception.format_stacktrace(stack)}")
+
       e ->
         Logger.warn("Unhandled error: #{inspect(e)}\n")
     end
