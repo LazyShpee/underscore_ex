@@ -5,6 +5,14 @@ defmodule UnderscoreEx.Command.Emoji do
   alias UnderscoreEx.Repo
   import Ecto.Query, only: [from: 2]
 
+  use UnderscoreEx.Command.GroupHelper
+
+  @impl true
+  def description,
+    do: """
+    Emoji management commands.
+    """
+
   def valid_emoji_name?(name), do: name |> String.match?(~r/^[a-z_0-9]{2,32}$/i)
 
   def get_managed_networks(user_id) do

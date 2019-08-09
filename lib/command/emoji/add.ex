@@ -1,7 +1,16 @@
 defmodule UnderscoreEx.Command.Emoji.Add do
   use UnderscoreEx.Command
   import UnderscoreEx.Command.Emoji
+  alias UnderscoreEx.Core.EventRegistry
   alias UnderscoreEx.Util
+
+  defp get_emoji_url_from_message(rest, message) do
+    {:ok, url} = get_emoji_url(rest)
+    case {url, message.attachments} do
+      {"", [%{url: url} | _]} -> {:ok, url}
+      {url, _} -> {:ok, url}
+    end
+  end
 
   @impl true
   def parse_args(arg),
@@ -24,7 +33,7 @@ defmodule UnderscoreEx.Command.Emoji.Add do
              dest.guild_id |> String.to_integer()
            ),
          {:perms, true} <- {:perms, :manage_emojis in perms},
-         {:ok, emoji_url} <- get_emoji_url(rest),
+         {:ok, emoji_url} <- get_emoji_url_from_message(rest, context.message),
          {:ok, base} <- url_to_base64(emoji_url),
          {:ok, emoji} <-
            Nostrum.Api.create_guild_emoji(dest.guild_id |> String.to_integer(),

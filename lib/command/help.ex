@@ -27,7 +27,7 @@ defmodule UnderscoreEx.Command.Help do
     end)
   end
 
-  def walk_tree(acc, _command, _prefix, __opts) do
+  def walk_tree(acc, _command, _prefix, _opts) do
     acc
   end
 

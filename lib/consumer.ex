@@ -19,6 +19,7 @@ defmodule UnderscoreEx.Consumer do
     import UnderscoreEx.Core
 
     %{
+      "math" => Command.Math,
       "latex" => Command.Latex,
       "test" => Command.Test,
       "echo" => Command.Echo,
@@ -35,31 +36,37 @@ defmodule UnderscoreEx.Consumer do
           Command.Alias
         ),
       "emoji" =>
-        group(%{
-          "list" => Command.Emoji.List,
-          "add" => Command.Emoji.Add,
-          "delete" => Command.Emoji.Delete,
-          "move" => Command.Emoji.Move,
-          "network" =>
-            group(%{
-              "create" => Command.Emoji.Network.Create,
-              "delete" => Command.Emoji.Network.Delete,
-              "show" => Command.Emoji.Network.Show,
-              "list" => Command.Emoji.Network.List,
-              "add" =>
-                group(%{
-                  "guild" => Command.Emoji.Network.Add.Guild,
-                  "manager" => Command.Emoji.Network.Add.Manager
-                }),
-              "edit" => Command.Emoji.Network.Edit,
-              "editguild" => Command.Emoji.Network.Edit.Guild,
-              "remove" =>
-                group(%{
-                  "guild" => Command.Emoji.Network.Remove.Guild,
-                  "manager" => Command.Emoji.Network.Remove.Manager
-                })
-            })
-        })
+        group(
+          %{
+            "list" => Command.Emoji.List,
+            "add" => Command.Emoji.Add,
+            "delete" => Command.Emoji.Delete,
+            "move" => Command.Emoji.Move,
+            "network" =>
+              group(
+                %{
+                  "create" => Command.Emoji.Network.Create,
+                  "delete" => Command.Emoji.Network.Delete,
+                  "show" => Command.Emoji.Network.Show,
+                  "list" => Command.Emoji.Network.List,
+                  "add" =>
+                    group(%{
+                      "guild" => Command.Emoji.Network.Add.Guild,
+                      "manager" => Command.Emoji.Network.Add.Manager
+                    }),
+                  "edit" => Command.Emoji.Network.Edit,
+                  "editguild" => Command.Emoji.Network.Edit.Guild,
+                  "remove" =>
+                    group(%{
+                      "guild" => Command.Emoji.Network.Remove.Guild,
+                      "manager" => Command.Emoji.Network.Remove.Manager
+                    })
+                },
+                Command.Emoji.Network
+              )
+          },
+          Command.Emoji
+        )
     }
     |> Core.put_commands()
   end

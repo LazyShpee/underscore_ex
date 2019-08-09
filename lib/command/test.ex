@@ -17,8 +17,9 @@ defmodule UnderscoreEx.Command.Test do
     channel_id = message.channel_id
 
     receive do
-      {:discord, {:MESSAGE_CREATE, %{author: %{id: ^id}, channel_id: ^channel_id}}} ->
-        "You sent another message :D"
+      {:discord, {:MESSAGE_REACTION_ADD, stuff}} ->
+        # %{channel_id: 220746476542885899, emoji: %{animated: false, id: nil, name: "™"}, guild_id: 179391900669837312, message_id: 609395005550755843, user_id: 87574389666611200}
+        "```elixir\n#{inspect(stuff)}\n```"
     after
       5_000 ->
         "I waited for too long..."
