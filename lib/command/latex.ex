@@ -3,12 +3,21 @@ defmodule UnderscoreEx.Command.Latex do
   alias UnderscoreEx.Util
 
   @impl true
+  def description,
+    do: """
+    Renders a LaTeX math snippet.
+    """
+
+  @impl true
+  def usage, do: ["<some latex math code>"]
+
+  @impl true
   def parse_args(arg), do: arg
 
   # Todo: move to https://quicklatex.com/
 
   @impl true
-  def call(%{message: message}, content) do
+  def call(_context, content) do
     data = %{
       auth: %{
         user: "guest",
@@ -45,6 +54,5 @@ defmodule UnderscoreEx.Command.Latex do
       end
 
     [embed: embed]
-    |> Util.pipe_message(message)
   end
 end

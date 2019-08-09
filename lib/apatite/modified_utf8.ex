@@ -23,28 +23,28 @@ defmodule Apatite.ModifiedUTF8 do
     end
   end
 
-  def read_utf(_data, acc \\ <<>>, _bytes)
-  def read_utf(data, acc, 0), do: {acc, data}
+  defp read_utf(_data, acc \\ <<>>, _bytes)
+  defp read_utf(data, acc, 0), do: {acc, data}
 
-  def read_utf(<<0::size(1), n::size(7), rest::binary>>, acc, bytes) do
+  defp read_utf(<<0::size(1), n::size(7), rest::binary>>, acc, bytes) do
     read_utf(rest, acc <> <<n>>, bytes - 1)
   end
 
-  def read_utf(
-        <<0b110::size(3), _a::size(5), 0b10::size(2), _b::size(6), rest::binary>>,
+  defp read_utf(
+        <<0b110::size(3), a::size(5), 0b10::size(2), b::size(6), rest::binary>>,
         acc,
         bytes
       ) do
-    read_utf(rest, acc <> "?", bytes - 2)
+    read_utf(rest, acc <> <<0b110::size(3), a::size(5), 0b10::size(2), b::size(6)>>, bytes - 2)
   end
 
-  def read_utf(
-        <<0b1110::size(4), _a::size(4), 0b10::size(2), _b::size(6), 0b10::size(2), _c::size(6),
+  defp read_utf(
+        <<0b1110::size(4), a::size(4), 0b10::size(2), b::size(6), 0b10::size(2), c::size(6),
           rest::binary>>,
         acc,
         bytes
       ) do
-    read_utf(rest, acc <> "?", bytes - 3)
+    read_utf(rest, acc <> <<0b1110::size(4), a::size(4), 0b10::size(2), b::size(6), 0b10::size(2), c::size(6)>>, bytes - 3)
   end
 
   def read_all(_data, _acc \\ [], _types)
@@ -68,9 +68,8 @@ defmodule Apatite.ModifiedUTF8 do
   def write(data, value, :utf) do
     value
     |> String.codepoints()
-    |> Enum.reduce(data |> write(String.length(value), :unsigned_short), fn
-      <<0::size(1), c::size(7)>>, data -> data <> <<0::size(1), c::size(7)>>
-      _, data -> data <> <<0::size(1), ??::size(7)>>
+    |> Enum.reduce(data |> write(byte_size(value), :unsigned_short), fn
+      chars, data -> data <> chars
     end)
   end
 

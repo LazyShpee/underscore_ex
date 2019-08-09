@@ -66,13 +66,18 @@ defmodule UnderscoreEx.Core do
          {:ok, result} <-
            run_commands(commands, context) do
       result
-      |> Enum.filter(fn r -> is_binary(r) end)
-      |> Enum.map(&String.trim/1)
-      |> Enum.join("\n")
-      |> Util.pipe_message(message)
+      |> Enum.chunk_by(&is_binary/1)
+      |> Enum.flat_map(fn
+        [e | _] = list when is_binary(e) -> [list |> Enum.map(&String.trim/1) |> Enum.join("\n")]
+        list -> list
+      end)
+      |> Enum.each(&Util.pipe_message(&1, message))
     else
-      {:error, <<reason::binary>>} ->
-        "Error: #{reason}" |> Util.pipe_message(message)
+      {:warning, content} when is_binary(content) or is_list(content) ->
+        content |> Util.pipe_message(message)
+
+      {:error, <<content::binary>>} ->
+        "Error: #{content}" |> Util.pipe_message(message)
 
       {:error, :not_a_command} ->
         nil
@@ -86,8 +91,10 @@ defmodule UnderscoreEx.Core do
       {:error, :no_commands} ->
         Logger.error("No commands loaded yet.")
 
+      {:error, e, stack} ->
+        Logger.error("Runtime error: #{inspect e}\n\n#{Exception.format_stacktrace stack}")
       e ->
-        Logger.warn("Unhandled error: #{inspect(e)}")
+        Logger.warn("Unhandled error: #{inspect(e)}\n")
     end
   end
 
@@ -95,6 +102,7 @@ defmodule UnderscoreEx.Core do
     commands
     |> Enum.reduce_while({:ok, []}, fn command, {:ok, acc} ->
       case run_command(command, context) do
+        {:ok, {:halt, out}} -> {:halt, {:ok, acc ++ [out]}}
         {:ok, out} -> {:cont, {:ok, acc ++ [out]}}
         e -> {:halt, e}
       end
@@ -120,7 +128,7 @@ defmodule UnderscoreEx.Core do
       {:ok, apply(command, :call, [context, args])}
     end
   rescue
-    e -> {:error, e}
+    e -> {:error, e, __STACKTRACE__}
   end
 
   def find_command_or_group(query) do

@@ -4,7 +4,6 @@ defmodule UnderscoreEx.Consumer do
   use Nostrum.Consumer
   require Logger
   alias UnderscoreEx.Core
-  alias UnderscoreEx.Command
 
   def start_link do
     Consumer.start_link(__MODULE__, max_restarts: 0)
@@ -16,22 +15,25 @@ defmodule UnderscoreEx.Consumer do
   end
 
   def my_handle_event({:READY, _, _ws_state}) do
+    alias UnderscoreEx.Command
     import UnderscoreEx.Core
 
     %{
       "latex" => Command.Latex,
       "test" => Command.Test,
       "echo" => Command.Echo,
-      "helptree" => Command.HelpTree,
-      "help" => Command.HelpTree,
+      "help" => Command.Help,
       "eval" => Command.Eval,
       "alias" =>
-        group(%{
-          "list" => Command.Alias.List,
-          "show" => Command.Alias.Show,
-          "delete" => Command.Alias.Delete,
-          "set" => Command.Alias.Set
-        }),
+        group(
+          %{
+            "list" => Command.Alias.List,
+            "show" => Command.Alias.Show,
+            "delete" => Command.Alias.Delete,
+            "set" => Command.Alias.Set
+          },
+          Command.Alias
+        ),
       "emoji" =>
         group(%{
           "list" => Command.Emoji.List,
@@ -46,15 +48,15 @@ defmodule UnderscoreEx.Consumer do
               "list" => Command.Emoji.Network.List,
               "add" =>
                 group(%{
-                  "guild" => Command.Emoji.Network.Add.Guild
-                  # "manager" => Command.Emoji.Network.Add.Manager
+                  "guild" => Command.Emoji.Network.Add.Guild,
+                  "manager" => Command.Emoji.Network.Add.Manager
                 }),
               "edit" => Command.Emoji.Network.Edit,
               "editguild" => Command.Emoji.Network.Edit.Guild,
               "remove" =>
                 group(%{
-                  "guild" => Command.Emoji.Network.Remove.Guild
-                  # "manager" => Command.Emoji.Network.Remove.Manager
+                  "guild" => Command.Emoji.Network.Remove.Guild,
+                  "manager" => Command.Emoji.Network.Remove.Manager
                 })
             })
         })
@@ -62,7 +64,7 @@ defmodule UnderscoreEx.Consumer do
     |> Core.put_commands()
   end
 
-  def my_handle_event(_event)do
+  def my_handle_event(_event) do
     :noop
   end
 

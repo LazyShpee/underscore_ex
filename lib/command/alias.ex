@@ -1,9 +1,15 @@
 defmodule UnderscoreEx.Command.Alias do
-  use UnderscoreEx.Command
-
   alias UnderscoreEx.Util
   alias UnderscoreEx.Schema.Alias
   alias UnderscoreEx.Repo
+
+  use UnderscoreEx.Command.GroupHelper
+
+  @impl true
+  def description,
+    do: """
+    Manage aliases within current guild or DM.
+    """
 
   def create_or_modify(name, context, %{} = changes) do
     case Repo.get_by(Alias, context: context, name: name) do
@@ -46,27 +52,6 @@ defmodule UnderscoreEx.Command.Alias do
       _ -> {:ok, command, nil}
     end
   end
-
-  @impl true
-  def usage,
-    do: [
-      "set <alias name> <alias content>",
-      "show <alias name>",
-      "list",
-      "delete <alias name>"
-    ]
-
-  @impl true
-  def call(%{call_name: call_name}, _args),
-    do: """
-    ```css
-    #{
-      usage()
-      |> Enum.map(&"#{call_name} #{&1}")
-      |> Enum.join("\n")
-    }
-    ```
-    """
 
   defmodule List do
     use UnderscoreEx.Command
