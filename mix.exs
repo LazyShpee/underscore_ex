@@ -21,7 +21,7 @@ defmodule UnderscoreEx.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :abacus],
+      extra_applications: [:logger, :abacus, :timex],
       mod: {UnderscoreEx.Application, []}
     ]
   end
@@ -34,7 +34,8 @@ defmodule UnderscoreEx.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:ex_doc, "~> 0.19"},
       {:httpoison, "~> 1.4"},
-      {:abacus, "~> 0.4.2"}
+      {:abacus, "~> 0.4.2"},
+      {:timex, "~> 3.6"}
     ]
   end
 end

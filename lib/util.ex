@@ -270,7 +270,9 @@ defmodule UnderscoreEx.Util do
     do:
       stuff
       |> chunk()
-      |> Enum.map(&Api.create_message(where, &1 |> Enum.at(0) |> String.trim()))
+      |> Enum.map(&(&1 |> Enum.at(0) |> String.trim))
+      |> Enum.reject(&(&1 == ""))
+      |> Enum.map(&Api.create_message(where, &1))
 
   def pipe_message(stuff, where), do: Api.create_message!(where, stuff)
 end

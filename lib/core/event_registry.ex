@@ -17,7 +17,14 @@ defmodule UnderscoreEx.Core.EventRegistry do
     Registry.register(__MODULE__, :subscribed, nil)
   end
 
-  def unsubscribe do
+  def unsubscribe(_mode \\ :kill)
+
+  def unsubscribe(:nokill) do
+    Registry.unregister(__MODULE__, :subscribed)
+  end
+
+  def unsubscribe(:kill) do
+    Registry.unregister(__MODULE__, :subscribed)
     Process.exit(self(), :kill)
   end
 

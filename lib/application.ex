@@ -6,6 +6,8 @@ defmodule UnderscoreEx.Application do
   alias UnderscoreEx.Consumer
 
   def start(_type, _args) do
+    :ets.new(:caca_users, [:set, :public, :named_table])
+
     children =
       [
         UnderscoreEx.Repo,

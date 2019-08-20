@@ -13,8 +13,8 @@ defmodule UnderscoreEx.Command.Test do
   def call(%{message: message}, _args) do
     "Waiting for you to reply for 5 seconds..." |> Util.pipe_message(message)
     EventRegistry.subscribe()
-    id = message.author.id
-    channel_id = message.channel_id
+    _id = message.author.id
+    _channel_id = message.channel_id
 
     receive do
       {:discord, {:MESSAGE_REACTION_ADD, stuff}} ->

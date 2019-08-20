@@ -19,6 +19,14 @@ defmodule UnderscoreEx.Consumer do
     import UnderscoreEx.Core
 
     %{
+      "caca" =>
+        group(
+          %{
+            "start" => Command.Caca.Start,
+            "last" => Command.Caca.Last
+          },
+          Command.Caca
+        ),
       "math" => Command.Math,
       "latex" => Command.Latex,
       "test" => Command.Test,

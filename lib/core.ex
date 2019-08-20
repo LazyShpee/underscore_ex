@@ -71,6 +71,7 @@ defmodule UnderscoreEx.Core do
         [e | _] = list when is_binary(e) -> [list |> Enum.map(&String.trim/1) |> Enum.join("\n")]
         list -> list
       end)
+      |> Enum.filter(&(is_binary(&1) or is_list(&1)))
       |> Enum.each(&Util.pipe_message(&1, message))
     else
       {:warning, content} when is_binary(content) or is_list(content) ->

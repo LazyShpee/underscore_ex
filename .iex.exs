@@ -4,3 +4,7 @@ search = fn query ->
   {:ok, %{body: body}} = Apatite.request(:get, "/loadtracks", "", identifier: "#{query}")
   Poison.decode! body
 end
+
+import Ecto.Query
+alias UnderscoreEx.Repo
+alias UnderscoreEx.Schema

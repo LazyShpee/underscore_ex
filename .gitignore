@@ -25,3 +25,5 @@ underscore_ex-*.tar
 /config/credentials.exs
 /start
 /.elixir_ls
+
+/test.exs
