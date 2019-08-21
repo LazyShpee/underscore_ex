@@ -54,10 +54,13 @@ defmodule UnderscoreEx.Command.Emoji.Add do
       {:perms, _} ->
         "I need the `MANAGE_EMOJIS` permissions in the **desitnation** guild."
 
+      {:error, str} when is_binary(str) ->
+        "Error: #{str}"
+
       e ->
         IO.inspect(e)
 
-        "Unknown error occurred. Make sure the file isn't too big (256Kb max) and that there is at least one free emoji slot on the target server."
+        "Unknown error occurred."
     end
   end
 end
