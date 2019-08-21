@@ -65,7 +65,7 @@ defmodule UnderscoreEx.Command.Caca.Start do
           """
           \nSaved caca.
           Lasted #{DateTime.diff(t_end, t_start)} seconds.
-          Location : #{(location == "" && "`Uknown`") || location}
+          Location : #{(location == "" && "`Unknown`") || location}
           """
       )
 
