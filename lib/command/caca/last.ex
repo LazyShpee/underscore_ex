@@ -1,9 +1,8 @@
 defmodule UnderscoreEx.Command.Caca.Last do
   use UnderscoreEx.Command
-  alias UnderscoreEx.Core.EventRegistry
   alias UnderscoreEx.Repo
   alias UnderscoreEx.Command.Caca
-  alias UnderscoreEx.Schema.Caca.{Time, User}
+  alias UnderscoreEx.Schema.Caca.Time
   import Ecto.Query, only: [from: 2]
 
   @impl true
@@ -17,9 +16,11 @@ defmodule UnderscoreEx.Command.Caca.Last do
         location
       end
 
-    time = t_end
-    |> Timex.to_datetime("Europe/Paris")
-    |> Timex.format!("{YYYY}-{0M}-{0D} at {h24}:{m}")
+    time =
+      t_end
+      |> Timex.to_datetime("Europe/Paris")
+      |> Timex.format!("{YYYY}-{0M}-{0D} at {h24}:{m}")
+
     "#{time} in #{location}"
   end
 
