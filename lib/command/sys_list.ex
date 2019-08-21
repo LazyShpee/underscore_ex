@@ -81,6 +81,13 @@ defmodule UnderscoreEx.Command.SysList do
     end
   end
 
+  defp format_entry(%{context_type: "guild" = context_type, context_id: context_id}) do
+    case Nostrum.Cache.GuildCache.get(context_id) do
+      {:ok, guild} -> "#{context_type} #{guild.name} (`#{guild.id}`)"
+      {:error, _} -> "#{context_type} `#{context_id}`"
+    end
+  end
+
   defp format_entry(%{context_type: context_type, context_id: context_id}) do
     "#{context_type} `#{context_id}`"
   end

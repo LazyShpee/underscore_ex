@@ -19,6 +19,8 @@ defmodule UnderscoreEx.Consumer do
     import UnderscoreEx.Core
 
     %{
+      "whoami" => Command.Whoami,
+      "su" => Command.Su,
       "syslist" => Command.SysList,
       "caca" =>
         group(
