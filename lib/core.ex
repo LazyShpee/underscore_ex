@@ -60,7 +60,6 @@ defmodule UnderscoreEx.Core do
     else
       :blacklisted
     end
-    |> IO.inspect()
   end
 
   def run(message) do
