@@ -14,9 +14,7 @@ defmodule UnderscoreEx.Predicates do
   end
 
   def bot_owner(%{message: message}) do
-    with {:ok, %{owner: %{id: string_id}}} <-
-           Nostrum.Api.get_application_information(),
-         true <- String.to_integer(string_id) == message.author.id do
+    with true <- UnderscoreEx.Core.get_owner == message.author.id do
       :passthrough
     else
       _ -> {:error, "This command is for my owner only."}

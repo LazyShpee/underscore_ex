@@ -52,10 +52,22 @@ defmodule UnderscoreEx.Core do
     e -> {:error, e.message}
   end
 
+  defp blacklisted?(message) do
+    if message.author.id == get_owner() or
+         UnderscoreEx.Predicates.syslists(["blacklist"], true).(%{message: message}) ==
+           :passthrough do
+      :not_blacklisted
+    else
+      :blacklisted
+    end
+    |> IO.inspect()
+  end
+
   def run(message) do
     context = %{message: message}
 
     with {:ok, command_line, prefix} <- extract_command(context),
+         :not_blacklisted <- blacklisted?(message),
          commands when is_list(commands) <-
            expand_commands(command_line, message.guild_id || message.author.id),
          context <-
@@ -217,6 +229,14 @@ defmodule UnderscoreEx.Core do
     GenServer.call(__MODULE__, {:put_commands, commands})
   end
 
+  def get_owner() do
+    GenServer.call(__MODULE__, :get_owner)
+  end
+
+  def fetch_owner() do
+    GenServer.cast(__MODULE__, :fetch_owner)
+  end
+
   #########################################
   # Server callbacks
 
@@ -227,7 +247,8 @@ defmodule UnderscoreEx.Core do
         prefixes: %{
           global: Application.get_env(:underscore_ex, :prefix) || ">"
         },
-        commands: nil
+        commands: nil,
+        owner: 0
       },
       name: __MODULE__
     )
@@ -243,5 +264,14 @@ defmodule UnderscoreEx.Core do
 
   def handle_call(:copy, _from, state) do
     {:reply, state, state}
+  end
+
+  def handle_call(:get_owner, _from, state) do
+    {:reply, state.owner, state}
+  end
+
+  def handle_cast(:fetch_owner, state) do
+    {:ok, %{owner: %{id: string_id}}} = Nostrum.Api.get_application_information()
+    {:noreply, %{state | owner: String.to_integer(string_id)}}
   end
 end

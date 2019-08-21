@@ -78,6 +78,8 @@ defmodule UnderscoreEx.Consumer do
         )
     }
     |> Core.put_commands()
+
+    Core.fetch_owner()
   end
 
   def my_handle_event(_event) do
