@@ -5,25 +5,50 @@ defmodule UnderscoreEx.Command.Su do
   def predicates, do: [&UnderscoreEx.Predicates.bot_owner/1]
 
   @impl true
-  def parse_args(arg), do: arg |> String.split(" ", parts: 2, trim: true)
+  def parse_args(arg) do
+    [options, command] = arg |> String.split("--", trim: true, parts: 2)
+
+    {options, _} =
+      options
+      |> OptionParser.split()
+      |> OptionParser.parse!(
+        switches: [user: :string, guild: :string, channel: :string],
+        aliases: [u: :user, g: :guild, c: :channel]
+      )
+
+    {options, command}
+  end
 
   @impl true
-  def call(%{message: message, prefix: prefix}, [user, command]) do
-    content = case command do
-      <<"raw:", rest::binary>> -> rest
-      command -> "#{prefix}#{command}"
-    end
+  def call(%{message: message, prefix: prefix}, {options, command}) do
+    content =
+      case command do
+        <<"raw:", rest::binary>> -> rest
+        command -> "#{prefix}#{command}"
+      end
 
-    {:ok, id} = UnderscoreEx.Util.resolve_user_id(user, message.guild_id)
+      IO.inspect options
 
-    tmp = message
-    |> Map.from_struct()
-    |> update_in([:author], &Map.from_struct/1)
-    |> update_in([:author, :id], fn _ -> id end)
-    |> update_in([:author], &struct!(%Nostrum.Struct.User{}, &1))
-    |> update_in([:content], fn _ -> "#{content}" end)
+    gid = "#{options[:guild] || message.guild_id}" |> String.to_integer()
+    {:ok, uid} = UnderscoreEx.Util.resolve_user_id("#{options[:user] || message.author.id}", gid)
 
-    UnderscoreEx.Core.run(struct!(%Nostrum.Struct.Message{}, tmp))
+    {:ok, cid} =
+      UnderscoreEx.Util.resolve_channel_id("#{options[:channel] || message.channel_id}", gid)
+
+    tmp =
+      message
+      |> Map.from_struct()
+      |> update_in([:author], &Map.from_struct/1)
+      |> update_in([:author, :id], fn _ -> uid end)
+      |> update_in([:author], &struct!(%Nostrum.Struct.User{}, &1))
+      |> update_in([:content], fn _ -> "#{content}" end)
+      |> update_in([:guild_id], fn _ -> gid end)
+      |> update_in([:channel_id], fn _ -> cid end)
+
+    UnderscoreEx.Consumer.handle_event(
+      {:MESSAGE_CREATE, struct!(%Nostrum.Struct.Message{}, tmp), nil}
+    )
+
     :ok
   end
 end
