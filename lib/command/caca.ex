@@ -25,7 +25,7 @@ defmodule UnderscoreEx.Command.Caca do
         {:discord,
          {:MESSAGE_CREATE, %{channel_id: ^channel_id, author: %{id: ^id}, content: content}}} ->
           case content do
-            "y" ->
+            c when c in ["y", "Y"] ->
               {:ok, user} =
                 User.changeset(%User{}, %{discord_id: id})
                 |> Repo.insert()
@@ -39,7 +39,7 @@ defmodule UnderscoreEx.Command.Caca do
               EventRegistry.unsubscribe()
           end
       after
-        10_000 ->
+        20_000 ->
           "Took too long to reply." |> UnderscoreEx.Util.pipe_message(message)
           EventRegistry.unsubscribe()
       end
