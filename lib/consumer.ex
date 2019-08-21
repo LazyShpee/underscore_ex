@@ -19,6 +19,7 @@ defmodule UnderscoreEx.Consumer do
     import UnderscoreEx.Core
 
     %{
+      "syslist" => Command.SysList,
       "caca" =>
         group(
           %{

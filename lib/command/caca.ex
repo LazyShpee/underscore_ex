@@ -7,23 +7,7 @@ defmodule UnderscoreEx.Command.Caca do
   @impl true
   def predicates,
     do: [
-      fn
-        %{message: %{author: %{id: id}}}
-        when id in [
-               # LazyShpee
-               87_574_389_666_611_200,
-               # Caillouche
-               169_194_737_826_398_209,
-               # masber
-               146_071_651_857_989_633,
-               # poney
-               169_884_954_245_857_280
-             ] ->
-          :passthrough
-
-        _ ->
-          {:error, "Early access command, only beta testers can access it for now."}
-      end
+      UnderscoreEx.Predicates.syslists(["caca"])
     ]
 
   def get_user(%{message: %{author: %{id: id}, channel_id: channel_id} = message}) do

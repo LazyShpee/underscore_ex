@@ -73,6 +73,36 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
+  def syslists(lists, blacklist \\ false) do
+    alias UnderscoreEx.Repo
+    alias UnderscoreEx.Schema.SysListEntry
+    import Ecto.Query, only: [from: 2]
+
+    fn %{message: %{channel_id: channel_id, author: %{id: user_id}}} ->
+      from(e in SysListEntry,
+        where:
+          e.list_name in ^lists and
+            ((e.context_type == ^"channel" and e.context_id == ^channel_id) or
+               (e.context_type == ^"user" and e.context_id == ^user_id))
+      )
+      |> Repo.all()
+      |> length()
+      |> case do
+        0 when blacklist ->
+          :passthrough
+
+        _ when blacklist ->
+          {:error, "Either you or this channel is blacklisted."}
+
+        0 when not blacklist ->
+          {:error, "Either you or this channel is not whitelisted to use this command."}
+
+        _ when not blacklist ->
+          :passthrough
+      end
+    end
+  end
+
   def my_perms(perms, mode \\ :all) do
     fn %{message: message} = context ->
       %{id: id} = Nostrum.Cache.Me.get()
