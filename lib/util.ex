@@ -28,6 +28,8 @@ defmodule UnderscoreEx.Util do
   alias Nostrum.Api
   alias Nostrum.Struct.Guild.Member
 
+  @min_jaro 0.62
+
   @doc """
   Resolves a user id from a query.
 
@@ -52,7 +54,7 @@ defmodule UnderscoreEx.Util do
 
   defp resolve_user_id_by_similarity(query, guild) do
     closest_match =
-      Enum.reduce(guild.members, {nil, 0.5}, fn {new_id, member}, {_, old_d} = old ->
+      Enum.reduce(guild.members, {nil, @min_jaro}, fn {new_id, member}, {_, old_d} = old ->
         new_d =
           max(
             String.jaro_distance(query, member.user.username),
@@ -90,7 +92,7 @@ defmodule UnderscoreEx.Util do
       [_, username, discriminator] ->
         case guild.members
              |> Enum.find(fn {_, member} ->
-               String.downcase(member.user.username) == username &&
+               String.downcase(member.user.username) == String.downcase(username) &&
                  member.user.discriminator == discriminator
              end) do
           {id, _} -> {:ok, id}
@@ -138,7 +140,7 @@ defmodule UnderscoreEx.Util do
 
   defp resolve_channel_id_by_similarity(query, guild) do
     closest_match =
-      Enum.reduce(guild.channels, {nil, 0.5}, fn {new_id, channel}, {_, old_d} = old ->
+      Enum.reduce(guild.channels, {nil, @min_jaro}, fn {new_id, channel}, {_, old_d} = old ->
         new_d = String.jaro_distance(query, channel.name)
 
         cond do
@@ -270,7 +272,7 @@ defmodule UnderscoreEx.Util do
     do:
       stuff
       |> chunk()
-      |> Enum.map(&(&1 |> Enum.at(0) |> String.trim))
+      |> Enum.map(&(&1 |> Enum.at(0) |> String.trim()))
       |> Enum.reject(&(&1 == ""))
       |> Enum.map(&Api.create_message(where, &1))
 
