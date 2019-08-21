@@ -101,17 +101,18 @@ defmodule UnderscoreEx.Command.Emoji do
     end
   end
 
-  @image_types ["image/png", "image/jpg", "image/gif"]
+  @image_types ["image/png", "image/jpg", "image/jpeg", "image/gif"]
   defp valid_emoji_file(headers) do
-    with {_, len} <-
-           headers |> Enum.find(fn {h, _} -> h |> String.downcase() == "content-length" end),
-         true <- String.to_integer(len) <= 256_000,
-         {_, type} <-
+    with {_, type} <-
            headers |> Enum.find(fn {h, _} -> h |> String.downcase() == "content-type" end),
-         true <- type in @image_types do
+         {:type, true} <- {:type, type in @image_types},
+         {_, len} <-
+           headers |> Enum.find(fn {h, _} -> h |> String.downcase() == "content-length" end),
+         {:size, true} <- {:size, String.to_integer(len) <= 256_000} do
       {:ok, type}
     else
-      _ -> {:error, :too_big_or_not_image}
+      {:type, false} -> {:error, :format_not_supported}
+      {:size, false} -> {:error, :file_too_big}
     end
   end
 
@@ -121,7 +122,8 @@ defmodule UnderscoreEx.Command.Emoji do
          {:ok, %{body: body}} <- HTTPoison.get(url) do
       {:ok, "data:#{type};base64,#{body |> Base.encode64()}"}
     else
-      {:error, :too_big_or_not_image} -> {:error, "Image format not supported or too big"}
+      {:error, :file_too_big} -> {:error, "Image too big"}
+      {:error, :format_not_supported} -> {:error, "Format not supported"}
       _ -> {:error, :httpoison_error}
     end
   end
