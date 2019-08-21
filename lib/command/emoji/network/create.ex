@@ -29,8 +29,12 @@ defmodule UnderscoreEx.Command.Emoji.Network.Create do
       {:error, %{errors: [{:name_id, {_, [{:validation, :format} | _]}} | _]}} ->
         "Network id is not valid."
 
-      {:error, _} ->
-        "Error occurred."
+      {:error, %{errors: [{:name, {_, [{:validation, :required} | _]}} | _]}} ->
+        "Network name can't be blank"
+
+      {:error, e} ->
+        IO.inspect(e)
+        "Unknown error occurred."
     end
   end
 end
