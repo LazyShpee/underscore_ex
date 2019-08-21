@@ -126,14 +126,14 @@ defmodule UnderscoreEx.Util do
 
   defp resolve_channel_id_by_mention(query) do
     case Regex.run(~r/<#(\d+)>/, query) do
-      [_, id] -> {:ok, id}
+      [_, id] -> {:ok, id |> String.to_integer()}
       _ -> {:error, :not_found}
     end
   end
 
   defp resolve_channel_id_by_raw_id(query) do
     case Regex.run(~r/(\d+)/, query) do
-      [id] -> {:ok, id}
+      [id] -> {:ok, id |> String.to_integer()}
       _ -> {:error, :not_found}
     end
   end
