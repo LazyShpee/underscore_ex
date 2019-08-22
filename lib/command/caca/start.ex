@@ -14,7 +14,7 @@ defmodule UnderscoreEx.Command.Caca.Start do
   def parse_args(arg), do: arg
 
   @impl true
-  def call(context, location) do
+  def call(context, label) do
     user = Caca.get_user(context)
 
     # Ten minutes
@@ -22,7 +22,7 @@ defmodule UnderscoreEx.Command.Caca.Start do
     t_start = Timex.now()
     discord_id = context.message.author.id
 
-    with true <- :ets.insert_new(:caca_users, {discord_id, t_start, location}),
+    with true <- :ets.insert_new(:caca_users, {discord_id, t_start, label}),
          {:ok, %{id: message_id, channel_id: channel_id} = message} <-
            Nostrum.Api.create_message(
              context.message,
@@ -79,7 +79,7 @@ defmodule UnderscoreEx.Command.Caca.Start do
             user_id: user.id,
             t_start: t_start,
             t_end: t_end,
-            location: location
+            label: label
           })
           |> UnderscoreEx.Repo.insert!()
 
@@ -89,7 +89,7 @@ defmodule UnderscoreEx.Command.Caca.Start do
               """
               \nSaved caca.
               Lasted #{DateTime.diff(t_end, t_start)} seconds.
-              Location : #{(location == "" && "`Unknown`") || location}
+              Label : #{(label == "" && "None") || label}
               """
           )
       end

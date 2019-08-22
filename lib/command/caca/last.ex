@@ -8,12 +8,12 @@ defmodule UnderscoreEx.Command.Caca.Last do
   @impl true
   defdelegate predicates, to: Caca
 
-  def caca_format(%Time{t_end: t_end, location: location}) do
-    location =
-      if location == "" do
-        "[Unknown]"
+  def caca_format(%Time{t_end: t_end, label: label}) do
+    label =
+      if label == "" do
+        "None"
       else
-        location
+        label
       end
 
     time =
@@ -21,7 +21,7 @@ defmodule UnderscoreEx.Command.Caca.Last do
       |> Timex.to_datetime("Europe/Paris")
       |> Timex.format!("{YYYY}-{0M}-{0D} at {h24}:{m}")
 
-    "#{time} in #{location}"
+    "`#{time}` : #{label}"
   end
 
   @impl true

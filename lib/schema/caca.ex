@@ -4,7 +4,7 @@ defmodule UnderscoreEx.Schema.Caca do
 
     schema "caca_times" do
       field(:user_id, :integer)
-      field(:location, :string, default: "")
+      field(:label, :string, default: "")
       field(:t_start, :utc_datetime)
       field(:t_end, :utc_datetime)
       field(:imported, :boolean, default: false)
@@ -17,7 +17,7 @@ defmodule UnderscoreEx.Schema.Caca do
       caca
       |> Ecto.Changeset.cast(params, [
         :user_id,
-        :location,
+        :label,
         :t_start,
         :t_end,
         :premium_data,
