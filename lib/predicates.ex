@@ -14,7 +14,7 @@ defmodule UnderscoreEx.Predicates do
   end
 
   def bot_owner(%{message: message}) do
-    with true <- UnderscoreEx.Core.get_owner == message.author.id do
+    with true <- UnderscoreEx.Core.get_owner() == message.author.id do
       :passthrough
     else
       _ -> {:error, "This command is for my owner only."}
