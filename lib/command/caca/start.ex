@@ -8,6 +8,7 @@ defmodule UnderscoreEx.Command.Caca.Start do
   defdelegate predicates, to: Caca
 
   @finish_emoji "💩"
+  @cancel_emoji "🛑"
 
   @impl true
   def parse_args(arg), do: arg
@@ -25,9 +26,16 @@ defmodule UnderscoreEx.Command.Caca.Start do
          {:ok, %{id: message_id, channel_id: channel_id} = message} <-
            Nostrum.Api.create_message(
              context.message,
-             "You started a caca, react with #{@finish_emoji} to end your caca."
+             "Starting caca..."
            ),
-         {:ok} <- Nostrum.Api.create_reaction(channel_id, message_id, @finish_emoji) do
+         {:ok} <- Nostrum.Api.create_reaction(channel_id, message_id, @finish_emoji),
+         :ok <- :timer.sleep(250),
+         {:ok} <- Nostrum.Api.create_reaction(channel_id, message_id, @cancel_emoji) do
+      Nostrum.Api.edit_message!(
+        message,
+        "You started a caca, react with #{@finish_emoji} to end your caca or #{@cancel_emoji} to cancel it."
+      )
+
       EventRegistry.subscribe()
 
       reply =
@@ -41,39 +49,56 @@ defmodule UnderscoreEx.Command.Caca.Start do
               user_id: ^discord_id
             }}} ->
             ""
+
+          {:discord,
+           {:MESSAGE_REACTION_ADD,
+            %{
+              channel_id: ^channel_id,
+              emoji: %{animated: false, id: nil, name: @cancel_emoji},
+              message_id: ^message_id,
+              user_id: ^discord_id
+            }}} ->
+            :cancel
         after
           timeout -> "Max caca duration for non premium user reached."
         end
 
       EventRegistry.unsubscribe(:nokill)
       :ets.delete(:caca_users, discord_id)
-      Nostrum.Api.edit_message!(message, reply <> "\nSaving caca...")
 
-      t_end = Timex.now()
+      case reply do
+        :cancel ->
+          Nostrum.Api.edit_message!(message, "Caca cancelled.")
 
-      Time.changeset(%Time{}, %{
-        user_id: user.id,
-        t_start: t_start,
-        t_end: t_end,
-        location: location
-      })
-      |> UnderscoreEx.Repo.insert!()
+        reply ->
+          Nostrum.Api.edit_message!(message, reply <> "\nSaving caca...")
 
-      Nostrum.Api.edit_message!(
-        message,
-        reply <>
-          """
-          \nSaved caca.
-          Lasted #{DateTime.diff(t_end, t_start)} seconds.
-          Location : #{(location == "" && "`Unknown`") || location}
-          """
-      )
+          t_end = Timex.now()
+
+          Time.changeset(%Time{}, %{
+            user_id: user.id,
+            t_start: t_start,
+            t_end: t_end,
+            location: location
+          })
+          |> UnderscoreEx.Repo.insert!()
+
+          Nostrum.Api.edit_message!(
+            message,
+            reply <>
+              """
+              \nSaved caca.
+              Lasted #{DateTime.diff(t_end, t_start)} seconds.
+              Location : #{(location == "" && "`Unknown`") || location}
+              """
+          )
+      end
 
       {:ok}
     else
       false -> "You're already in the middle of a caca."
     end
   rescue
-    _ -> "An error occured..."
+    e -> "An error occured... #{inspect(e)}"
   end
 end
