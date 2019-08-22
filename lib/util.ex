@@ -45,11 +45,15 @@ defmodule UnderscoreEx.Util do
     resolve_user_id(query, GuildCache.get!(guild_id))
   end
 
-  def resolve_user_id(query, guild) do
-    with {:error, _} <- resolve_user_id_by_raw_id(query),
-         {:error, _} <- resolve_user_id_by_mention(query),
+  def resolve_user_id(query, %Nostrum.Struct.Guild{} = guild) do
+    with {:error, _} <- resolve_user_id(query, nil),
          {:error, _} <- resolve_user_id_by_tag(String.downcase(query), guild),
          do: resolve_user_id_by_similarity(query, guild)
+  end
+
+  def resolve_user_id(query, nil) do
+    with {:error, _} <- resolve_user_id_by_mention(query),
+         do: resolve_user_id_by_raw_id(query)
   end
 
   defp resolve_user_id_by_similarity(query, guild) do
@@ -114,14 +118,19 @@ defmodule UnderscoreEx.Util do
   """
   @spec resolve_channel_id(String.t(), Nostrum.Struct.Guild.t() | integer) ::
           {:error, atom} | {:ok, integer}
-  def resolve_channel_id(query, guild_id) when is_number(guild_id) do
-    resolve_channel_id(query, GuildCache.get!(guild_id))
+
+  def resolve_channel_id(query, %Nostrum.Struct.Guild{} = guild) do
+    with {:error, _} <- resolve_channel_id(query, nil),
+         do: resolve_channel_id_by_similarity(query, guild)
   end
 
-  def resolve_channel_id(query, guild) do
+  def resolve_channel_id(query, nil) do
     with {:error, _} <- resolve_channel_id_by_mention(query),
-         {:error, _} <- resolve_channel_id_by_raw_id(query),
-         do: resolve_channel_id_by_similarity(query, guild)
+         do: resolve_channel_id_by_raw_id(query)
+  end
+
+  def resolve_channel_id(query, guild_id) when is_number(guild_id) do
+    resolve_channel_id(query, GuildCache.get!(guild_id))
   end
 
   defp resolve_channel_id_by_mention(query) do
@@ -131,8 +140,8 @@ defmodule UnderscoreEx.Util do
     end
   end
 
-  defp resolve_channel_id_by_raw_id(query) do
-    case Regex.run(~r/(\d+)/, query) do
+  def resolve_channel_id_by_raw_id(query) do
+    case Regex.run(~r/\d+/, query) do
       [id] -> {:ok, id |> String.to_integer()}
       _ -> {:error, :not_found}
     end

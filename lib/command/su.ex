@@ -22,18 +22,26 @@ defmodule UnderscoreEx.Command.Su do
   @impl true
   def call(%{message: message, prefix: prefix}, {options, command}) do
     content =
-      case command do
+      case command |> String.trim() do
         <<"raw:", rest::binary>> -> rest
         command -> "#{prefix}#{command}"
       end
 
-      IO.inspect options
-
     gid = "#{options[:guild] || message.guild_id}" |> String.to_integer()
-    {:ok, uid} = UnderscoreEx.Util.resolve_user_id("#{options[:user] || message.author.id}", gid)
+
+    {:ok, uid} =
+      if options[:user] do
+        UnderscoreEx.Util.resolve_user_id(options[:user], gid)
+      else
+        {:ok, message.author.id}
+      end
 
     {:ok, cid} =
-      UnderscoreEx.Util.resolve_channel_id("#{options[:channel] || message.channel_id}", gid)
+      if options[:channel] do
+        UnderscoreEx.Util.resolve_channel_id(options[:channel], gid)
+      else
+        {:ok, message.channel_id}
+      end
 
     tmp =
       message
