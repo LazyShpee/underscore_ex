@@ -12,7 +12,7 @@ defmodule UnderscoreEx.Core.EventRegistry do
     Registry.start_link(keys: :duplicate, name: __MODULE__)
   end
 
-  def subscribe do
+  def subscribe() do
     # the calling process will be sent in
     Registry.register(__MODULE__, :subscribed, nil)
   end

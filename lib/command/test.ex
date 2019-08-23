@@ -1,6 +1,5 @@
 defmodule UnderscoreEx.Command.Test do
   use UnderscoreEx.Command
-  alias UnderscoreEx.Core.EventRegistry
   alias UnderscoreEx.Util
 
   @impl true
@@ -9,23 +8,53 @@ defmodule UnderscoreEx.Command.Test do
   @impl true
   def predicates, do: [&UnderscoreEx.Predicates.bot_owner/1]
 
+  defp display(info), do: "Counter is currently at : #{info}."
+
   @impl true
-  def call(%{message: message}, _args) do
-    "Waiting for you to reply for 5 seconds..." |> Util.pipe_message(message)
-    EventRegistry.subscribe()
-    _id = message.author.id
-    _channel_id = message.channel_id
+  def call(%{message: %{author: %{id: id}} = message}, _args) do
+    :ets.insert(:states, {{:counter, id}, 0})
 
-    receive do
-      {:discord, {:MESSAGE_REACTION_ADD, stuff}} ->
-        # %{channel_id: 220746476542885899, emoji: %{animated: false, id: nil, name: "™"}, guild_id: 179391900669837312, message_id: 609395005550755843, user_id: 87574389666611200}
-        "```elixir\n#{inspect(stuff)}\n```"
-    after
-      5_000 ->
-        "I waited for too long..."
+    message =
+      0
+      |> display
+      |> Util.pipe_message(message, :pipe_only)
+
+    ["➖", "➕", "🚫"]
+    |> Util.pipe_reactions(message)
+
+    mid = message.id
+
+    Util.loop(
+      id,
+      fn
+        {ev,
+         %{
+           emoji: %{animated: false, id: nil, name: emoji},
+           message_id: ^mid,
+           user_id: ^id
+         }}
+        when ev in [:MESSAGE_REACTION_ADD, :MESSAGE_REACTION_REMOVE] ->
+          {:ok, emoji}
+
+        _ ->
+          :ko
+      end,
+      fn
+        "🚫" -> {:halt, nil}
+        emoji ->
+          [{_, counter}] = :ets.lookup(:states, {:counter, id})
+          counter = case emoji do
+            "➖" -> counter - 1
+            "➕" -> counter + 1
+          end
+          Nostrum.Api.edit_message!(message, display(counter))
+          :ets.insert(:states, {{:counter, id}, counter})
+          :cont
+      end
+    )
+    |> case do
+      :timeout -> "Timed out"
+      _ -> "Halted the normal way"
     end
-    |> Util.pipe_message(message)
-
-    EventRegistry.unsubscribe()
   end
 end

@@ -28,7 +28,7 @@ defmodule UnderscoreEx.Command.Caca.Last do
   def call(context, _args) do
     user = Caca.get_user(context)
 
-    Repo.all(from(t in Time, where: t.user_id == ^user.id, order_by: [desc: t.t_end], limit: 5))
+    Repo.all(from(t in Time, where: t.user_id == ^user.id, order_by: [desc: t.t_end], limit: 1))
     |> Enum.map(&caca_format/1)
     |> Enum.join("\n")
   end

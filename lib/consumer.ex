@@ -26,7 +26,8 @@ defmodule UnderscoreEx.Consumer do
         group(
           %{
             "start" => Command.Caca.Start,
-            "last" => Command.Caca.Last
+            "last" => Command.Caca.Last,
+            "chaud" => Command.Caca.Show
           },
           Command.Caca
         ),

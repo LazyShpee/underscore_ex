@@ -285,5 +285,91 @@ defmodule UnderscoreEx.Util do
       |> Enum.reject(&(&1 == ""))
       |> Enum.map(&Api.create_message(where, &1))
 
-  def pipe_message(stuff, where), do: Api.create_message!(where, stuff)
+  def pipe_message(stuff, where, :pipe_only \\ :pipe_only), do: Api.create_message!(where, stuff)
+
+  def loop(session_id, predicate \\ fn _ -> true end, callback, timeout \\ 20_000)
+      when is_number(timeout) and is_function(callback) and is_function(predicate) do
+    case :ets.lookup(:loop_users, session_id) do
+      [] -> nil
+      [{_, pid}] -> Process.exit(pid, :kill)
+    end
+
+    :ets.insert(:loop_users, {session_id, self()})
+    UnderscoreEx.Core.EventRegistry.subscribe()
+
+    result = wait_loop(predicate, callback, timeout)
+
+    case :ets.lookup(:loop_users, session_id) do
+      [] ->
+        nil
+
+      [{_, pid}] ->
+        if pid == self() do
+          UnderscoreEx.Core.EventRegistry.unsubscribe(:nokill)
+        else
+          Process.exit(pid, :kill)
+        end
+
+        :ets.delete(:loop_users, session_id)
+    end
+
+    result
+  end
+
+  defp wait_loop(predicate, callback, timeout) do
+    require Logger
+
+    receive do
+      {:discord, event} ->
+        try do
+          case apply(predicate, [event]) do
+            {:ok, data} -> apply(callback, [data])
+            {:ok} -> apply(callback, [event])
+            _ -> :cont
+          end
+          |> case do
+            {:halt, result} -> result
+            :halt -> :halted
+            _ -> wait_loop(predicate, callback, timeout)
+          end
+        rescue
+          e ->
+            Logger.warn(
+              "Resuming wait loop after crash\n#{inspect(e)}\n\n#{
+                Exception.format_stacktrace(__STACKTRACE__)
+              }"
+            )
+
+            wait_loop(predicate, callback, timeout)
+        end
+    after
+      timeout -> :timeout
+    end
+  end
+
+  def pvar(key) do
+    case :ets.lookup(:states, key) |> Enum.at(0) do
+      {_key, value} -> value
+      _ -> nil
+    end
+  end
+
+  def pvar(key, value) do
+    case value do
+      nil -> :ets.delete(:states, key)
+      value -> :ets.insert(:states, {key, value})
+    end
+  end
+
+  def pipe_reactions(reactions, message) do
+    reactions
+    |> Enum.intersperse(:wait)
+    |> Enum.each(fn
+      :wait ->
+        :timer.sleep(250)
+
+      emoji ->
+        Api.create_reaction(message.channel_id, message.id, emoji)
+    end)
+  end
 end
