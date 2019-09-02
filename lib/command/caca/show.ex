@@ -33,6 +33,7 @@ defmodule UnderscoreEx.Command.Caca.Show do
 
   def display(%User{id: id}, {page, pages, _item_count}) do
     offset = round(page - 1) * @item_per_page
+
     cacas =
       from(t in Time,
         where: t.user_id == ^id,
@@ -51,19 +52,40 @@ defmodule UnderscoreEx.Command.Caca.Show do
   @valid_emojis @actions |> Enum.map(fn {_, e} -> e end)
 
   @impl true
-  def call(%{message: %{author: %{id: id}}} = context, _args) do
+  def parse_args(args) do
+    args
+    |> String.split()
+    |> Enum.at(0, "0")
+    |> Integer.parse()
+    |> case do
+      {n, _} -> n
+      _ -> 0
+    end
+  end
+
+  @impl true
+  def call(%{message: %{author: %{id: id}}, call_name: call_name, prefix: prefix} = context, page) do
+    disable_pager = UnderscoreEx.Predicates.syslists(["pager_blacklist"]).(context) == :passthrough
     user = Caca.get_user(context)
     item_count = Repo.one(from(t in Time, where: t.user_id == ^user.id, select: count(t.id)))
     pages = (item_count / @item_per_page) |> :math.ceil()
-    page = 1
-    Util.pvar({id, :page}, page)
+    page = page |> max(1) |> min(pages)
 
-    {:ok, message} =
-      Nostrum.Api.create_message(context.message, display(user, {page, pages, item_count}))
+    initial_text = display(user, {page, pages, item_count})
 
-    if item_count == 0 do
+    initial_text =
+      if disable_pager,
+        do:
+          initial_text <> "\nPager has been disabled for you, use `#{prefix} #{call_name} <page>` to view other pages.",
+        else: initial_text
+
+    {:ok, message} = Nostrum.Api.create_message(context.message, initial_text)
+
+    if item_count == 0 or disable_pager do
       Process.exit(self(), :kill)
     end
+
+    Util.pvar({id, :page}, page)
 
     @valid_emojis
     |> UnderscoreEx.Util.pipe_reactions(message)

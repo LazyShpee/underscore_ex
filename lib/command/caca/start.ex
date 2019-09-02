@@ -17,8 +17,19 @@ defmodule UnderscoreEx.Command.Caca.Start do
   def call(context, label) do
     user = Caca.get_user(context)
 
-    # Ten minutes
-    timeout = if user.premium, do: :infinity, else: 600_000
+    timeout =
+      with false <- false && user.premium,
+           {:ok, client} <- Exredis.start_link(),
+           value <- Exredis.Api.get("underscoreex:caca_timeout"),
+           Exredis.stop(client),
+           {n, _} <- Integer.parse(value) do
+        n
+      else
+        true -> :infinity
+        # 10 minutes
+        _ -> 600_000
+      end
+
     t_start = Timex.now()
     discord_id = context.message.author.id
 
