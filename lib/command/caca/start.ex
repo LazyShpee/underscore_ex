@@ -18,7 +18,7 @@ defmodule UnderscoreEx.Command.Caca.Start do
     user = Caca.get_user(context)
 
     timeout =
-      with false <- false && user.premium,
+      with false <- user.premium,
            {:ok, client} <- Exredis.start_link(),
            value <- Exredis.Api.get("underscoreex:caca_timeout"),
            Exredis.stop(client),

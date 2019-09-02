@@ -11,7 +11,7 @@ defmodule UnderscoreEx.Command.Caca.Show do
 
   @item_per_page 5
 
-  def caca_format(%Time{t_end: t_end, label: label}) do
+  def caca_format(%Time{t_end: t_end, label: label, t_start: t_start}) do
     label =
       if label == "" do
         "None"
@@ -19,12 +19,12 @@ defmodule UnderscoreEx.Command.Caca.Show do
         label
       end
 
-    time =
-      t_end
+    time_s =
+      t_start
       |> Timex.to_datetime("Europe/Paris")
       |> Timex.format!("{YYYY}-{0M}-{0D} at {h24}:{m}")
 
-    "`#{time}` : #{label}"
+    "`#{time_s}, #{DateTime.diff(t_end, t_start) |> Integer.to_string |> String.pad_leading(5)}s` : #{label}"
   end
 
   def display(%User{}, {_page, _pages, 0}) do
