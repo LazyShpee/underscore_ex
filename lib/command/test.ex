@@ -40,13 +40,18 @@ defmodule UnderscoreEx.Command.Test do
           :ko
       end,
       fn
-        "🚫" -> {:halt, nil}
+        "🚫" ->
+          {:halt, nil}
+
         emoji ->
           [{_, counter}] = :ets.lookup(:states, {:counter, id})
-          counter = case emoji do
-            "➖" -> counter - 1
-            "➕" -> counter + 1
-          end
+
+          counter =
+            case emoji do
+              "➖" -> counter - 1
+              "➕" -> counter + 1
+            end
+
           Nostrum.Api.edit_message!(message, display(counter))
           :ets.insert(:states, {{:counter, id}, counter})
           :cont

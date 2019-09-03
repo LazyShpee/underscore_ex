@@ -24,7 +24,9 @@ defmodule UnderscoreEx.Command.Caca.Show do
       |> Timex.to_datetime("Europe/Paris")
       |> Timex.format!("{YYYY}-{0M}-{0D} at {h24}:{m}")
 
-    "`#{time_s}, #{DateTime.diff(t_end, t_start) |> Integer.to_string |> String.pad_leading(5)}s` : #{label}"
+    "`#{time_s}, #{DateTime.diff(t_end, t_start) |> Integer.to_string() |> String.pad_leading(5)}s` : #{
+      label
+    }"
   end
 
   def display(%User{}, {_page, _pages, 0}) do
@@ -65,7 +67,9 @@ defmodule UnderscoreEx.Command.Caca.Show do
 
   @impl true
   def call(%{message: %{author: %{id: id}}, call_name: call_name, prefix: prefix} = context, page) do
-    disable_pager = UnderscoreEx.Predicates.syslists(["pager_blacklist"]).(context) == :passthrough
+    disable_pager =
+      UnderscoreEx.Predicates.syslists(["pager_blacklist"]).(context) == :passthrough
+
     user = Caca.get_user(context)
     item_count = Repo.one(from(t in Time, where: t.user_id == ^user.id, select: count(t.id)))
     pages = (item_count / @item_per_page) |> :math.ceil()
@@ -76,7 +80,8 @@ defmodule UnderscoreEx.Command.Caca.Show do
     initial_text =
       if disable_pager,
         do:
-          initial_text <> "\nPager has been disabled for you, use `#{prefix} #{call_name} <page>` to view other pages.",
+          initial_text <>
+            "\nPager has been disabled for you, use `#{prefix} #{call_name} <page>` to view other pages.",
         else: initial_text
 
     {:ok, message} = Nostrum.Api.create_message(context.message, initial_text)
