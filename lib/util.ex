@@ -319,18 +319,34 @@ defmodule UnderscoreEx.Util do
   defp wait_loop(predicate, callback, timeout) do
     require Logger
 
+    time_then = DateTime.utc_now()
+
     receive do
       {:discord, event} ->
         try do
           case apply(predicate, [event]) do
             {:ok, data} -> apply(callback, [data])
             {:ok} -> apply(callback, [event])
-            _ -> :cont
+            _ -> :cont_reduce_timeout
           end
           |> case do
-            {:halt, result} -> result
-            :halt -> :halted
-            _ -> wait_loop(predicate, callback, timeout)
+            {:halt, result} ->
+              result
+
+            :halt ->
+              :halted
+
+            :cont_reduce_timeout ->
+              time_now = DateTime.utc_now()
+              time_left = DateTime.diff(time_now, time_then)
+              wait_loop(
+                predicate,
+                callback,
+                timeout - time_left * 1000
+              )
+
+            _ ->
+              wait_loop(predicate, callback, timeout)
           end
         rescue
           e ->
