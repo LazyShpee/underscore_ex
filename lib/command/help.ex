@@ -59,6 +59,21 @@ defmodule UnderscoreEx.Command.Help do
   end
 
   @impl true
+  def call(context, <<"--tree", query::binary>>) do
+    result = Core.find_command_or_group(query |> String.trim()) |> IO.inspect()
+
+    call_name =
+      if query == "" do
+        "UnderscoreEx"
+      else
+        String.slice(query, 0..(-String.length(result |> elem(3)) - 1))
+        |> String.trim()
+      end
+
+      make_group_tree(result, context, call_name)
+  end
+
+  @impl true
   def call(context, query) do
     result = Core.find_command_or_group(query)
 
@@ -102,37 +117,7 @@ defmodule UnderscoreEx.Command.Help do
       else
         _ -> []
       end ++
-        with {:ok, :group, group, _rest, _depth} <- result do
-          out =
-            group
-            |> walk_tree(
-              ascii: true,
-              filter: fn entries ->
-                entries
-                |> Enum.filter(fn
-                  {_, data} -> Core.check_predicates(data, context) == {:ok}
-                end)
-                |> Enum.sort(fn {a, _}, {b, _} -> a < b end)
-              end
-            )
-            |> Enum.join("\n")
-
-          [
-            %Nostrum.Struct.Embed.Field{
-              name: "Tree",
-              value:
-                """
-                ```
-                #{call_name |> String.replace(~r" +", "/")}
-                #{out}
-                ```
-                """
-                |> String.replace(" ", <<0xC2, 0xA0>>)
-            }
-          ]
-        else
-          _ -> []
-        end
+        make_group_categories(result, context)
 
     [
       embed: %Nostrum.Struct.Embed{
@@ -142,4 +127,51 @@ defmodule UnderscoreEx.Command.Help do
       }
     ]
   end
+
+  defp make_group_categories({:ok, :group, %{commands: commands}, _rest, _depth}, context) do
+    commands
+    |> Enum.filter(&(Core.check_predicates(&1 |> elem(1), context) == {:ok}))
+    |> Enum.map(fn {name, data} ->
+      {:ok, cmd} = Core.get_command(data)
+      {apply(cmd, :category, []), name}
+    end)
+    |> Enum.group_by(fn {k, _} -> k end, fn {_, x} -> x end)
+    |> Enum.map(fn {name, names} ->
+      %Nostrum.Struct.Embed.Field{
+        name: name,
+        value: names |> Enum.map(&"`#{&1}`") |> Enum.join(" ")
+      }
+    end)
+  end
+
+  defp make_group_categories(_, _), do: []
+
+  defp make_group_tree(
+         {:ok, :group, group, _rest, _depth},
+         context,
+         call_name
+       ) do
+    out =
+      group
+      |> walk_tree(
+        ascii: true,
+        filter: fn entries ->
+          entries
+          |> Enum.filter(fn
+            {_, data} -> Core.check_predicates(data, context) == {:ok}
+          end)
+          |> Enum.sort(fn {a, _}, {b, _} -> a < b end)
+        end
+      )
+      |> Enum.join("\n")
+
+    """
+    ```
+    #{call_name |> String.replace(~r" +", "/")}
+    #{out}
+    ```
+    """
+  end
+
+  defp make_group_tree(_, _, _), do: "*No tree*"
 end

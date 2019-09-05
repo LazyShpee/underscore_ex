@@ -11,7 +11,9 @@ defmodule UnderscoreEx.Command do
 
   @callback description() :: String.t()
 
-  @optional_callbacks [usage: 0, predicates: 0, description: 0, parse_args: 1]
+  @callback category() :: String.t()
+
+  @optional_callbacks usage: 0, predicates: 0, description: 0, parse_args: 1, category: 0
 
   defmacro __using__(_opts \\ []) do
     quote do
@@ -26,9 +28,11 @@ defmodule UnderscoreEx.Command do
       @impl true
       def description, do: ""
       @impl true
+      def category, do: "Misc"
+      @impl true
       def call(_context, _args), do: :ok
 
-      defoverridable usage: 0, predicates: 0, parse_args: 1, description: 0, call: 2
+      defoverridable usage: 0, predicates: 0, parse_args: 1, description: 0, call: 2, category: 0
     end
   end
 end
