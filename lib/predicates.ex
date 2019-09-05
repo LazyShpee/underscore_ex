@@ -76,11 +76,12 @@ defmodule UnderscoreEx.Predicates do
     alias UnderscoreEx.Schema.SysListEntry
     import Ecto.Query, only: [from: 2]
 
-    fn %{message: %{channel_id: channel_id, author: %{id: user_id}}} ->
+    fn %{message: %{channel_id: channel_id, guild_id: guild_id, author: %{id: user_id}}} ->
       from(e in SysListEntry,
         where:
           e.list_name in ^lists and
             ((e.context_type == ^"channel" and e.context_id == ^channel_id) or
+               (e.context_type == ^"guild" and e.context_id == ^guild_id) or
                (e.context_type == ^"user" and e.context_id == ^user_id))
       )
       |> Repo.all()

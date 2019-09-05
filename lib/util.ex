@@ -108,6 +108,22 @@ defmodule UnderscoreEx.Util do
     end
   end
 
+  def resolve_guild_id(query, %Nostrum.Struct.Guild{id: guild_id}) do
+    resolve_guild_id(query, guild_id)
+  end
+
+  def resolve_guild_id(<<"g:", query::binary>>, guild_id) when query in ["here", "this"] do
+    {:ok, guild_id}
+  end
+
+  def resolve_guild_id(<<"g:", query::binary>>, _guild_id) do
+    {:ok, query |> String.to_integer()}
+  end
+
+  def resolve_guild_id(_query, _guild_id) do
+    {:error, :not_found}
+  end
+
   @doc """
   Resolves a channel id from a query.
 
@@ -339,6 +355,7 @@ defmodule UnderscoreEx.Util do
             :cont_reduce_timeout ->
               time_now = DateTime.utc_now()
               time_left = DateTime.diff(time_now, time_then)
+
               wait_loop(
                 predicate,
                 callback,
@@ -387,5 +404,35 @@ defmodule UnderscoreEx.Util do
       emoji ->
         Api.create_reaction(message.channel_id, message.id, emoji)
     end)
+  end
+
+  def get_body({:ok, %HTTPoison.Response{} = reponse}), do: get_body(reponse)
+
+  def get_body(%HTTPoison.Response{headers: headers, body: body}) do
+    headers
+    |> Enum.find({nil, "text/plain"}, &(elem(&1, 0) == "Content-Type"))
+    |> elem(1)
+    |> case do
+      "application/json" -> Poison.decode!(body)
+      _ -> body
+    end
+  end
+
+  def request(method, url, body \\ "", header \\ [], options \\ [])
+
+  def request(method, url, %{} = body, header, options) do
+    with {:ok, body} <- Poison.encode(body) do
+      HTTPoison.request(
+        method,
+        url,
+        body,
+        [{"Content-Type", "application/json"} | header],
+        options
+      )
+    end
+  end
+
+  def request(method, url, body, header, options) do
+    HTTPoison.request(method, url, body, [{"Content-Type", "application/json"} | header], options)
   end
 end

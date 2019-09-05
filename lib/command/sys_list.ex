@@ -95,6 +95,9 @@ defmodule UnderscoreEx.Command.SysList do
   @impl true
   def call(context, [name, action, query]) do
     with {:error, :not_found, _} <-
+           UnderscoreEx.Util.resolve_guild_id(query, context.message.guild_id)
+           |> Tuple.append("guild"),
+         {:error, :not_found, _} <-
            UnderscoreEx.Util.resolve_user_id(query, context.message.guild_id)
            |> Tuple.append("user"),
          {:error, :not_found, _} <-

@@ -19,6 +19,7 @@ defmodule UnderscoreEx.Consumer do
     import UnderscoreEx.Core
 
     %{
+      "code" => Command.Code,
       "cfg" => Command.CFG,
       "whoami" => Command.Whoami,
       "su" => Command.Su,
