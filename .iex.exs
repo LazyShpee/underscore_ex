@@ -5,6 +5,6 @@ search = fn query ->
   Poison.decode! body
 end
 
-import Ecto.Query
-alias UnderscoreEx.Repo
-alias UnderscoreEx.Schema
+#import Ecto.Query
+#alias UnderscoreEx.Repo
+#alias UnderscoreEx.Schema

@@ -9,6 +9,7 @@ defmodule UnderscoreEx.Application do
     :ets.new(:caca_users, [:set, :public, :named_table])
     :ets.new(:loop_users, [:set, :public, :named_table])
     :ets.new(:states, [:set, :public, :named_table])
+    TIO.init()
 
     children =
       [

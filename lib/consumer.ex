@@ -20,6 +20,7 @@ defmodule UnderscoreEx.Consumer do
 
     %{
       "code" => Command.Code,
+      "tio" => Command.TIO,
       "cfg" => Command.CFG,
       "whoami" => Command.Whoami,
       "su" => Command.Su,
