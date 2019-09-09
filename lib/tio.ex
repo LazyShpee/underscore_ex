@@ -97,6 +97,7 @@ defmodule TIO do
       [{_, token}] ->
         HTTPoison.get(vars["baseURL"] <> vars["quitURL"] <> "/#{token}")
     end
+
     deflated_payload = make_payload(code, lang, options) |> :zlib.gzip() |> String.slice(10..-1)
     token = make_token()
     :ets.insert(:tio, {session_id, token})

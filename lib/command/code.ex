@@ -60,36 +60,49 @@ defmodule UnderscoreEx.Command.Code do
 
   @impl true
   def call(_context, {lang, code}) do
-    %{} = reply = Util.request(:post, "https://run.glot.io/languages/#{lang}/latest", %{
-      "files" => [
+    %{} =
+      reply =
+      Util.request(
+        :post,
+        "https://run.glot.io/languages/#{lang}/latest",
         %{
-          "name" => "main.#{get_ext(lang)}",
-          "content" => code
-        }
-      ]
-    }, [
-      {"Authorization", "Token #{Application.get_env(:underscore_ex, :glot_api_key)}"}
-    ])
-    |> Util.get_body()
+          "files" => [
+            %{
+              "name" => "main.#{get_ext(lang)}",
+              "content" => code
+            }
+          ]
+        },
+        [
+          {"Authorization", "Token #{Application.get_env(:underscore_ex, :glot_api_key)}"}
+        ]
+      )
+      |> Util.get_body()
 
-    [embed: %Nostrum.Struct.Embed{
-      title: "Result",
-      description: String.duplicate("─", 30),
-      fields: [
-        %{
-          name: "stdout",
-          value: reply["stdout"]
-        },
-        %{
-          name: "stderr",
-          value: reply["stderr"]
-        },
-        %{
-          name: "error",
-          value: reply["error"]
-        },
-      ] |> Enum.reject(fn %{value: value} -> value == "" end)
-      |> Enum.map(fn %{name: name, value: value} -> %Nostrum.Struct.Embed.Field{name: name, value: "```\n#{value}```"} end)
-    }]
+    [
+      embed: %Nostrum.Struct.Embed{
+        title: "Result",
+        description: String.duplicate("─", 30),
+        fields:
+          [
+            %{
+              name: "stdout",
+              value: reply["stdout"]
+            },
+            %{
+              name: "stderr",
+              value: reply["stderr"]
+            },
+            %{
+              name: "error",
+              value: reply["error"]
+            }
+          ]
+          |> Enum.reject(fn %{value: value} -> value == "" end)
+          |> Enum.map(fn %{name: name, value: value} ->
+            %Nostrum.Struct.Embed.Field{name: name, value: "```\n#{value}```"}
+          end)
+      }
+    ]
   end
 end
