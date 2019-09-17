@@ -19,6 +19,7 @@ defmodule UnderscoreEx.Consumer do
     import UnderscoreEx.Core
 
     %{
+      "chrole" => Command.ChRole,
       "code" => Command.Code,
       "tio" => Command.TIO,
       "cfg" => Command.CFG,
