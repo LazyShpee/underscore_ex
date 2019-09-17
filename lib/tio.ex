@@ -4,6 +4,10 @@ defmodule TIO do
   def init() do
     :ets.new(:tio, [:set, :public, :named_table])
 
+    update_info()
+  end
+
+  def update_info() do
     Logger.info("Getting TIO info...")
     vars = get_info()
     Logger.info("Getting TIO languages...")
@@ -97,6 +101,7 @@ defmodule TIO do
       [{_, token}] ->
         HTTPoison.get(vars["baseURL"] <> vars["quitURL"] <> "/#{token}")
     end
+
     deflated_payload = make_payload(code, lang, options) |> :zlib.gzip() |> String.slice(10..-1)
     token = make_token()
     :ets.insert(:tio, {session_id, token})

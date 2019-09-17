@@ -8,3 +8,4 @@ end
 #import Ecto.Query
 #alias UnderscoreEx.Repo
 #alias UnderscoreEx.Schema
+alias  UnderscoreEx.Command

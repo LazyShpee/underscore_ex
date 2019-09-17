@@ -70,7 +70,7 @@ defmodule UnderscoreEx.Command.Help do
         |> String.trim()
       end
 
-      make_group_tree(result, context, call_name)
+    make_group_tree(result, context, call_name)
   end
 
   @impl true
