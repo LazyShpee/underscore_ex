@@ -102,6 +102,33 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
+  def guild(ids) do
+    fn %{message: %{guild_id: guild_id}} ->
+        case guild_id in ids do
+          true -> :passthrough
+          false -> {:error}
+        end
+    end
+  end
+
+  def user(ids) do
+    fn %{message: %{author: %{id: id}}} ->
+      case id in ids do
+        true -> :passthrough
+        false -> {:error}
+      end
+    end
+  end
+
+  def channel(ids) do
+    fn %{message: %{channel_id: channel_id}} ->
+      case channel_id in ids do
+        true -> :passthrough
+        false -> {:error}
+      end
+    end
+  end
+
   def my_perms(perms, mode \\ :all) do
     fn %{message: message} = context ->
       %{id: id} = Nostrum.Cache.Me.get()

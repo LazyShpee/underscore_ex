@@ -91,6 +91,9 @@ defmodule UnderscoreEx.Core do
       {:error, <<content::binary>>} ->
         "Error: #{content}" |> Util.pipe_message(message)
 
+      {:error, nil} ->
+        :noop
+
       {:error, :not_a_command} ->
         nil
 
@@ -173,6 +176,7 @@ defmodule UnderscoreEx.Core do
       case pred.(context) do
         :passthrough -> {:cont, :passthrough}
         {:error, _reason} = err -> {:halt, err}
+        {:error} -> {:halt, nil}
       end
     end)
     |> case do

@@ -36,7 +36,8 @@ defmodule UnderscoreEx.MixProject do
       {:httpoison, "~> 1.4"},
       {:abacus, "~> 0.4.2"},
       {:timex, "~> 3.6"},
-      {:exredis, ">= 0.2.4"}
+      {:exredis, ">= 0.2.4"},
+      {:rcon, "~> 0.3.0"}
     ]
   end
 end

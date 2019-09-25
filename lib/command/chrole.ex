@@ -5,10 +5,11 @@ defmodule UnderscoreEx.Command.ChRole do
   # __stop_chrole
 
   @impl true
-  def usage, do: [
-    "",
-    "(<+|-><role name>)+"
-  ]
+  def usage,
+    do: [
+      "",
+      "(<+|-><role name>)+"
+    ]
 
   @impl true
   def predicates, do: [UnderscoreEx.Predicates.context(:guild)]
@@ -42,8 +43,9 @@ defmodule UnderscoreEx.Command.ChRole do
         "No chroles setup for this guild."
 
       n when ops == [] ->
-        "#{n} chrole(s): " <> (Enum.map(roles, fn {_, %{name: name}} -> name end)
-        |> Enum.join(", "))
+        "#{n} chrole(s): " <>
+          (Enum.map(roles, fn {_, %{name: name}} -> name end)
+           |> Enum.join(", "))
 
       _ ->
         ops

@@ -12,6 +12,8 @@ defmodule UnderscoreEx.Consumer do
   def my_handle_event({:MESSAGE_CREATE, %{author: %{bot: bot}} = message, _ws_state})
       when bot != true do
     Core.run(message)
+
+    UnderscoreEx.Command.Private.RCon.handle_message(message)
   end
 
   def my_handle_event({:READY, _, _ws_state}) do
@@ -19,6 +21,9 @@ defmodule UnderscoreEx.Consumer do
     import UnderscoreEx.Core
 
     %{
+      # Private commands
+      "rcon" => Command.Private.RCon,
+      # Public commands
       "chrole" => Command.ChRole,
       "code" => Command.Code,
       "tio" => Command.TIO,
