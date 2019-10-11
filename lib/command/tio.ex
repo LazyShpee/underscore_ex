@@ -14,9 +14,9 @@ defmodule UnderscoreEx.Command.TIO do
 
   def usage,
     do: [
-      "tio run <language> <code>",
-      "tio lang [query]",
-      "tio lang random"
+      "run <language> <code>",
+      "lang [query]",
+      "lang random"
     ]
 
   # @impl true
@@ -101,7 +101,7 @@ defmodule UnderscoreEx.Command.TIO do
 
   @impl true
   def call(context, ["run", stuff]) do
-    [lang, code] = stuff |> String.split(" ", trim: true, parts: 2)
+    [lang, code] = stuff |> String.split([" ", "\n"], trim: true, parts: 2)
     {:ok, [res, stats]} = Elixir.TIO.run(code, lang, context.message.author.id)
 
     [
@@ -111,11 +111,11 @@ defmodule UnderscoreEx.Command.TIO do
         fields: [
           %Field{
             name: "stdout",
-            value: "```\n#{res}```"
+            value: "```\n#{res |> String.slice(0..1016)}```"
           },
           %Field{
             name: "misc",
-            value: "```\n#{stats}```"
+            value: "```\n#{stats |> String.slice(-1010..-1)}```"
           }
         ]
       }

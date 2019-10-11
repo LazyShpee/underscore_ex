@@ -100,7 +100,7 @@ defmodule UnderscoreEx.Command.Code do
           ]
           |> Enum.reject(fn %{value: value} -> value == "" end)
           |> Enum.map(fn %{name: name, value: value} ->
-            %Nostrum.Struct.Embed.Field{name: name, value: "```\n#{value}```"}
+            %Nostrum.Struct.Embed.Field{name: name, value: "```\n#{value |> String.slice(0..1016)}```"}
           end)
       }
     ]
