@@ -109,8 +109,8 @@ defmodule UnderscoreEx.Command.TIO do
   @impl true
   def call(context, ["run", stuff]) do
     [lang, code] = stuff |> String.split([" ", "\n"], trim: true, parts: 2)
-    with {:ok, [stdout, misc]} <- Elixir.TIO.run(code, lang, context.message.author.id) do
 
+    with {:ok, [stdout, misc]} <- Elixir.TIO.run(code, lang, context.message.author.id) do
       {stderr, stats} = misc |> String.split("\n") |> Enum.split(-5)
 
       [
