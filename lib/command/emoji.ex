@@ -53,6 +53,8 @@ defmodule UnderscoreEx.Command.Emoji do
     from([n, g, m] in get_guilds_query(network_name_id, guild_id, user_id), select: {n, g})
     |> Repo.all()
     |> Enum.filter(fn {n, g} -> n.owner_id == "#{user_id}" or g.locked != true end)
+    |> Enum.uniq_by(fn {n, g} -> {n.id, g.guild_id} end)
+    |> IO.inspect()
   end
 
   def resolve_emoji_path(path, guild_id) do

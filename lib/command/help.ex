@@ -60,7 +60,7 @@ defmodule UnderscoreEx.Command.Help do
 
   @impl true
   def call(context, <<"--tree", query::binary>>) do
-    result = Core.find_command_or_group(query |> String.trim()) |> IO.inspect()
+    result = Core.find_command_or_group(query |> String.trim())
 
     call_name =
       if query == "" do
@@ -174,4 +174,17 @@ defmodule UnderscoreEx.Command.Help do
   end
 
   defp make_group_tree(_, _, _), do: "*No tree*"
+
+  @impl true
+  def usage, do: [
+    "",
+    "<command>",
+    "--tree",
+    "--tree <command>",
+  ]
+
+  @impl true
+  def description, do: """
+  The help command. It can be used to see detailled command help if available, sub commands if any and a tree style view of the commands (see usage).
+  """
 end

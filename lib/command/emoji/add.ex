@@ -52,7 +52,7 @@ defmodule UnderscoreEx.Command.Emoji.Add do
         "I'm not in one of those guilds anymore."
 
       {:perms, _} ->
-        "I need the `MANAGE_EMOJIS` permissions in the **desitnation** guild."
+        "I need the `MANAGE_EMOJIS` permissions in the **destination** guild."
 
       {:error, str} when is_binary(str) ->
         "Error: #{str}"
