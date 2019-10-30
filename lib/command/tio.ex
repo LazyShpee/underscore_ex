@@ -42,6 +42,13 @@ defmodule UnderscoreEx.Command.TIO do
   end
 
   @impl true
+  def call(_context, ["lang"]) do
+    [{_, langs}] = :ets.lookup(:tio, :langs_cache)
+
+    "I know #{langs |> Map.keys() |> length()} languages."
+  end
+
+  @impl true
   def call(_context, ["lang", query]) do
     [{_, langs}] = :ets.lookup(:tio, :langs_cache)
     query = String.downcase(query)
@@ -102,35 +109,38 @@ defmodule UnderscoreEx.Command.TIO do
   @impl true
   def call(context, ["run", stuff]) do
     [lang, code] = stuff |> String.split([" ", "\n"], trim: true, parts: 2)
-    {:ok, [stdout, misc]} = Elixir.TIO.run(code, lang, context.message.author.id)
+    with {:ok, [stdout, misc]} <- Elixir.TIO.run(code, lang, context.message.author.id) do
 
-    {stderr, stats} = misc |> String.split("\n") |> Enum.split(-5)
+      {stderr, stats} = misc |> String.split("\n") |> Enum.split(-5)
 
-    [
-      embed: %Embed{
-        title: "TIO Result - #{lang} - #{byte_size(code)} bytes",
-        description: String.duplicate("─", 30),
-        fields:
-          [
-            %Field{
-              name: "stdout",
-              value: stdout |> String.trim()
-            },
-            %Field{
-              name: "stderr",
-              value: stderr |> Enum.join("\n") |> String.trim()
-            },
-            %Field{
-              name: "stats",
-              value: stats |> Enum.join("\n") |> String.trim()
-            }
-          ]
-          |> Enum.reject(fn %Field{value: v} -> byte_size(v) === 0 end)
-          |> Enum.map(fn %Field{value: v} = field ->
-            %Field{field | value: "```\n#{v |> String.slice(0..1016)}```"}
-          end)
-      }
-    ]
+      [
+        embed: %Embed{
+          title: "TIO Result - #{lang} - #{byte_size(code)} bytes",
+          description: String.duplicate("─", 30),
+          fields:
+            [
+              %Field{
+                name: "stdout",
+                value: stdout |> String.trim()
+              },
+              %Field{
+                name: "stderr",
+                value: stderr |> Enum.join("\n") |> String.trim()
+              },
+              %Field{
+                name: "stats",
+                value: stats |> Enum.join("\n") |> String.trim()
+              }
+            ]
+            |> Enum.reject(fn %Field{value: v} -> byte_size(v) === 0 end)
+            |> Enum.map(fn %Field{value: v} = field ->
+              %Field{field | value: "```\n#{v |> String.slice(0..1016)}```"}
+            end)
+        }
+      ]
+    else
+      {:ok, [stuff]} -> "Error: #{stuff}"
+    end
   end
 
   def call(context, _) do
