@@ -21,6 +21,7 @@ defmodule UnderscoreEx.Consumer do
     import UnderscoreEx.Core
 
     %{
+      "im" => Command.IM,
       # Private commands
       "rcon" => Command.Private.RCon,
       # Public commands
