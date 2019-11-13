@@ -25,13 +25,25 @@ defmodule UnderscoreEx.Command.IM do
             _ -> c
           end
       end)
+      |> String.replace("\\\n", "")
       |> OptionParser.split()
-      |> IO.inspect()
 
-    type = Enum.at(args, -1)
+    args =
+      case args |> Enum.at(-1) |> String.match?(~r/\-$/) do
+        true -> args
+        false -> args |> List.insert_at(-1, "-")
+      end
 
-    case System.cmd("magick", args |> List.replace_at(-1, "#{type}:-")) do
-      {out, 0} -> [file: %{name: "output.#{type}", body: out}]
+    result = System.cmd("magick", args)
+
+    name =
+      case UnderscoreEx.Util.File.signature(result |> elem(0)) do
+        {:ok, type} -> "ouput.#{type}"
+        {:error, _} -> "ouput"
+      end
+
+    case result do
+      {out, 0} -> [file: %{name: name, body: out}]
       {_, _} -> "An error occurred."
     end
   end
