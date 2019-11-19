@@ -10,8 +10,12 @@ defmodule UnderscoreEx.Command.Caca do
       UnderscoreEx.Predicates.syslists(["caca"])
     ]
 
-  def get_user(%{message: %{author: %{id: id}, channel_id: channel_id} = message}) do
-    with nil <- User |> Repo.get_by(discord_id: id) do
+  def get_user(
+        %{message: %{author: %{id: id}, channel_id: channel_id} = message},
+        silent \\ false
+      ) do
+    with nil <- User |> Repo.get_by(discord_id: id),
+         false <- silent do
       """
       You don't have a CacaTime\\™ account.
       **If you create a user you agree that your discord id will be used to identify you and link your datas.**
@@ -36,12 +40,14 @@ defmodule UnderscoreEx.Command.Caca do
 
             _ ->
               "Did not create user." |> UnderscoreEx.Util.pipe_message(message)
-              EventRegistry.unsubscribe()
+              EventRegistry.unsubscribe(if silent, do: :nokill, else: :kill)
+              nil
           end
       after
         20_000 ->
           "Took too long to reply." |> UnderscoreEx.Util.pipe_message(message)
-          EventRegistry.unsubscribe()
+          EventRegistry.unsubscribe(if silent, do: :nokill, else: :kill)
+          nil
       end
     end
   end

@@ -33,7 +33,7 @@ defmodule UnderscoreEx.Command.Caca.Start do
     t_start = Timex.now()
     discord_id = context.message.author.id
 
-    with true <- :ets.insert_new(:caca_users, {discord_id, t_start, label}),
+    with true <- :ets.insert_new(:caca_users, {discord_id, t_start, label, self()}),
          {:ok, %{id: message_id, channel_id: channel_id} = message} <-
            Nostrum.Api.create_message(
              context.message,
@@ -69,6 +69,8 @@ defmodule UnderscoreEx.Command.Caca.Start do
               message_id: ^message_id,
               user_id: ^discord_id
             }}} ->
+            :cancel
+          {:cancel} ->
             :cancel
         after
           timeout -> "Max caca duration for non premium user reached."

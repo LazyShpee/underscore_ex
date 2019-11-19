@@ -37,7 +37,8 @@ defmodule UnderscoreEx.Consumer do
           %{
             "start" => Command.Caca.Start,
             "last" => Command.Caca.Last,
-            "chaud" => Command.Caca.Show
+            "chaud" => Command.Caca.Show,
+            "cancel" => Command.Caca.Cancel
           },
           Command.Caca
         ),
