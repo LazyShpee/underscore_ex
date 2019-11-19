@@ -102,7 +102,7 @@ defmodule UnderscoreEx.Command.Caca.Show do
       fn
         {ev,
          %{
-           emoji: %{animated: false, id: nil, name: emoji},
+           emoji: %{id: nil, name: emoji},
            message_id: ^mid,
            user_id: ^id
          }}

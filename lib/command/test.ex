@@ -29,13 +29,16 @@ defmodule UnderscoreEx.Command.Test do
       fn
         {ev,
          %{
-           emoji: %{animated: false, id: nil, name: emoji},
+           emoji: %{id: nil, name: emoji},
            message_id: ^mid,
            user_id: ^id
          }}
         when ev in [:MESSAGE_REACTION_ADD, :MESSAGE_REACTION_REMOVE] ->
-          {:ok, emoji}
-
+          if emoji in ["➖", "➕", "🚫"] do
+            {:ok, emoji}
+          else
+            :ko
+          end
         _ ->
           :ko
       end,

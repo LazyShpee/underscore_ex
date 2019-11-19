@@ -55,7 +55,7 @@ defmodule UnderscoreEx.Command.Caca.Start do
            {:MESSAGE_REACTION_ADD,
             %{
               channel_id: ^channel_id,
-              emoji: %{animated: false, id: nil, name: @finish_emoji},
+              emoji: %{id: nil, name: @finish_emoji},
               message_id: ^message_id,
               user_id: ^discord_id
             }}} ->
@@ -65,7 +65,7 @@ defmodule UnderscoreEx.Command.Caca.Start do
            {:MESSAGE_REACTION_ADD,
             %{
               channel_id: ^channel_id,
-              emoji: %{animated: false, id: nil, name: @cancel_emoji},
+              emoji: %{id: nil, name: @cancel_emoji},
               message_id: ^message_id,
               user_id: ^discord_id
             }}} ->
