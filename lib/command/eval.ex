@@ -30,7 +30,7 @@ defmodule UnderscoreEx.Command.Eval do
         Util.usage("<some elixir code here>", context)
 
       code ->
-        "```elixir\n#{Util.eval([message: context.message, rest: context.rest], code)}```"
+        "```elixir\n#{Util.eval([message: context.message, rest: context.rest, context: context], code)}```"
     end
   end
 end
