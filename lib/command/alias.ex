@@ -125,6 +125,7 @@ defmodule UnderscoreEx.Command.Alias do
 
         e ->
           IO.inspect(e)
+
           Util.usage("<name> <aliased command>", context)
       end
     end

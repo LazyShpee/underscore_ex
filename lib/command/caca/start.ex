@@ -70,6 +70,7 @@ defmodule UnderscoreEx.Command.Caca.Start do
               user_id: ^discord_id
             }}} ->
             :cancel
+
           {:cancel} ->
             :cancel
         after

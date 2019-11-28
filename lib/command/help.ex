@@ -176,15 +176,16 @@ defmodule UnderscoreEx.Command.Help do
   defp make_group_tree(_, _, _), do: "*No tree*"
 
   @impl true
-  def usage, do: [
-    "",
-    "<command>",
-    "--tree",
-    "--tree <command>",
-  ]
+  def usage,
+    do: [
+      "",
+      "<command>",
+      "--tree [command]"
+    ]
 
   @impl true
-  def description, do: """
-  The help command. It can be used to see detailled command help if available, sub commands if any and a tree style view of the commands (see usage).
-  """
+  def description,
+    do: """
+    The help command. It can be used to see detailled command help if available, sub commands if any and a tree style view of the commands (see usage).
+    """
 end

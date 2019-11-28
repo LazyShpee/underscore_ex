@@ -39,6 +39,7 @@ defmodule UnderscoreEx.Command.Test do
           else
             :ko
           end
+
         _ ->
           :ko
       end,

@@ -104,10 +104,10 @@ defmodule UnderscoreEx.Predicates do
 
   def guild(ids) do
     fn %{message: %{guild_id: guild_id}} ->
-        case guild_id in ids do
-          true -> :passthrough
-          false -> {:error}
-        end
+      case guild_id in ids do
+        true -> :passthrough
+        false -> {:error}
+      end
     end
   end
 
