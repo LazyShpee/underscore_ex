@@ -13,6 +13,25 @@ defmodule UnderscoreEx.Command.Emoji.Add do
   end
 
   @impl true
+  def description,
+    do: """
+    Adds a new emoji to a managed guild.
+
+    Emoji name must be between 2 and 32 characters and must only contains underscores or alphanumerical characters.
+
+    `source` is either a discord emoji, a url or the attachment is left blank
+    The source can't be bigger than 256Kb.
+    """
+
+  @impl true
+  def usage,
+    do: [
+      "<destination> [source]",
+      "<guild id>/<emoji name> [source]",
+      "<network id>/<guild id>/<emoji name> [source]"
+    ]
+
+  @impl true
   def parse_args(arg),
     do:
       [_, _]

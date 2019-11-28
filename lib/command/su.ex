@@ -5,6 +5,22 @@ defmodule UnderscoreEx.Command.Su do
   def predicates, do: [&UnderscoreEx.Predicates.bot_owner/1]
 
   @impl true
+  def usage,
+    do: [
+      "<options> -- <command>"
+    ]
+
+  @impl true
+  def description,
+    do: """
+    **Options :**
+    `--user=<user>`, `-u <user>` : `user` is a user resolvable string, **required**
+    `--channel=<channel>`, `-c <channel>` : `channel` is a channel resolvable string
+    `--guild=<guild>`, `-g <guild>` : `guild` is a guild resolvable string
+    `--verbose`, `-v` : verbose mode
+    """
+
+  @impl true
   def parse_args(arg) do
     [options, command] = arg |> String.split("--", trim: true, parts: 2)
 

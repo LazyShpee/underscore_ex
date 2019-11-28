@@ -60,5 +60,11 @@ defmodule UnderscoreEx.Command.Emoji.Network.Add.Guild do
   end
 
   @impl true
-  def call(_context, _args), do: :ok
+  def call(context, _args), do: UnderscoreEx.Command.Help.call(context, context.unaliased_call_name)
+
+  @impl true
+  def usage,
+    do: [
+      "<network name id> <guild name id> [guild id]"
+    ]
 end
