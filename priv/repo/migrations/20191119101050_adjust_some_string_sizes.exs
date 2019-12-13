@@ -1,4 +1,4 @@
-defmodule UnderscoreEx.Repo.Migrations.AdjustSomeStirngSizes do
+defmodule UnderscoreEx.Repo.Migrations.AdjustSomeStringSizes do
   use Ecto.Migration
 
   def change do

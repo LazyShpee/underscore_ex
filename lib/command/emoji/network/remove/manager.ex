@@ -35,5 +35,12 @@ defmodule UnderscoreEx.Command.Emoji.Network.Remove.Manager do
   end
 
   @impl true
-  def call(_context, _args), do: :noop
+  def call(context, _args),
+    do: UnderscoreEx.Command.Help.call(context, context.unaliased_call_name)
+
+  @impl true
+  def usage,
+    do: [
+      "<network name id> <user>"
+    ]
 end

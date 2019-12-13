@@ -45,4 +45,13 @@ defmodule UnderscoreEx.Command.Emoji.Network.Edit.Guild do
         "Guild id is not valid."
     end
   end
+
+  @impl true
+  def call(context, _args), do: UnderscoreEx.Command.Help.call(context, context.unaliased_call_name)
+
+  @impl true
+  def usage,
+    do: [
+      "<network id> <guild id> <key> [value]"
+    ]
 end

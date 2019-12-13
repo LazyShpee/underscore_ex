@@ -6,13 +6,12 @@ defmodule UnderscoreEx.Command.Emoji.Network.Create do
   @impl true
   def parse_args(arg),
     do:
-      [_, _]
-      |> destructure(arg |> String.split(" ", parts: 2, trim: true))
-      |> Enum.map(&(&1 || ""))
+      arg
+      |> String.split(" ", parts: 2, trim: true)
       |> List.to_tuple()
 
   @impl true
-  def call(context, {name_id, name}) do
+  def call(context, {name_id, name}) when not is_nil(name_id) and not is_nil(name) do
     Network.changeset(%Network{}, %{
       name_id: name_id,
       name: name,
@@ -37,4 +36,13 @@ defmodule UnderscoreEx.Command.Emoji.Network.Create do
         "Unknown error occurred."
     end
   end
+
+  @impl true
+  def call(context, _args), do: UnderscoreEx.Command.Help.call(context, context.unaliased_call_name)
+
+  @impl true
+  def usage,
+    do: [
+      "<network name id> <network name>"
+    ]
 end

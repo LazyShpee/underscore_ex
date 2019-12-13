@@ -25,4 +25,10 @@ defmodule UnderscoreEx.Command.Emoji.Network.Delete do
       _ -> "Error occurred."
     end
   end
+
+  @impl true
+  def usage,
+    do: [
+      "<network name id>"
+    ]
 end
