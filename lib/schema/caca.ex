@@ -1,5 +1,8 @@
 defmodule UnderscoreEx.Schema.Caca do
+  @moduledoc false
+
   defmodule Time do
+    @moduledoc false
     use Ecto.Schema
 
     schema "caca_times" do
@@ -30,6 +33,7 @@ defmodule UnderscoreEx.Schema.Caca do
   end
 
   defmodule User do
+    @moduledoc false
     use Ecto.Schema
 
     schema "caca_users" do

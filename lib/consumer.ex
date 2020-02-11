@@ -5,7 +5,7 @@ defmodule UnderscoreEx.Consumer do
   require Logger
   alias UnderscoreEx.Core
 
-  def start_link do
+  def start_link() do
     Consumer.start_link(__MODULE__, max_restarts: 0)
   end
 
@@ -61,6 +61,7 @@ defmodule UnderscoreEx.Consumer do
       "emoji" =>
         group(
           %{
+            "prepare" => Command.Emoji.Prepare,
             "list" => Command.Emoji.List,
             "add" => Command.Emoji.Add,
             "delete" => Command.Emoji.Delete,

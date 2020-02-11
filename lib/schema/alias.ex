@@ -1,4 +1,5 @@
 defmodule UnderscoreEx.Schema.Alias do
+  @moduledoc false
   use Ecto.Schema
 
   schema "aliases" do

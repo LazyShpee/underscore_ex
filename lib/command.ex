@@ -17,6 +17,7 @@ defmodule UnderscoreEx.Command do
 
   defmacro __using__(_opts \\ []) do
     quote do
+      @moduledoc false
       @behaviour unquote(__MODULE__)
 
       @impl true

@@ -1,5 +1,7 @@
 defmodule UnderscoreEx.Core do
-  @moduledoc false
+  @moduledoc """
+  The core of UnderscoreEx, everything used for running commands is here.
+  """
 
   use GenServer
   require Logger
@@ -20,7 +22,7 @@ defmodule UnderscoreEx.Core do
       acc
       |> String.replace("#{@escaper}#{o}", r)
     end)
-    |> String.split(";;", trim: true)
+    |> String.split(splitter, trim: true)
     |> Enum.map(fn e ->
       subs
       |> Enum.reduce(e, fn {o, r}, acc ->
@@ -32,6 +34,11 @@ defmodule UnderscoreEx.Core do
   end
 
   @stop_at ["alias"]
+  @max_depth 3
+  @doc "Expands a command line by splitting it and resolving aliases up to #{@max_depth} deep or while the line doesn't start with any of #{
+         @stop_at |> Enum.join(", ")
+       }."
+  @spec expand_commands(String.t(), number, number) :: {:error, String.t()} | [String.t()]
   def expand_commands(line, alias_context, depth \\ 0) do
     if @stop_at |> Enum.find(fn s -> line |> String.starts_with?(s) end) do
       [line]
@@ -43,7 +50,7 @@ defmodule UnderscoreEx.Core do
 
         cond do
           part == line -> [line]
-          depth >= 3 -> raise "Too many embedded aliases."
+          depth >= @max_depth -> raise "Too many embedded aliases."
           true -> expand_commands(line, alias_context, depth + 1)
         end
       end)
@@ -52,7 +59,9 @@ defmodule UnderscoreEx.Core do
     e -> {:error, e.message}
   end
 
-  defp blacklisted?(message) do
+  @doc "Take a message and checks wether the author is blacklisted or not."
+  @spec blacklisted?(Map.t()) :: :blacklisted | :not_blacklisted
+  def blacklisted?(message) do
     if message.author.id == get_owner() or
          UnderscoreEx.Predicates.syslists(["blacklist"], true).(%{message: message}) ==
            :passthrough do

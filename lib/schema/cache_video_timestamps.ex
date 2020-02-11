@@ -1,4 +1,5 @@
 defmodule UnderscoreEx.Schema.CachedVideoTimestamps do
+  @moduledoc false
   use Ecto.Schema
 
   schema "cache_video_timestamps" do

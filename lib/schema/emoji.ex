@@ -1,5 +1,7 @@
 defmodule UnderscoreEx.Schema.Emoji do
+  @moduledoc false
   defmodule Guild do
+    @moduledoc false
     use Ecto.Schema
 
     schema "emoji_guilds" do
@@ -49,6 +51,7 @@ defmodule UnderscoreEx.Schema.Emoji do
   end
 
   defmodule Manager do
+    @moduledoc false
     use Ecto.Schema
 
     schema "emoji_managers" do
@@ -67,6 +70,7 @@ defmodule UnderscoreEx.Schema.Emoji do
   end
 
   defmodule Network do
+    @moduledoc false
     use Ecto.Schema
 
     schema "emoji_networks" do

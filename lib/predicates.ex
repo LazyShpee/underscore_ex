@@ -1,6 +1,31 @@
 defmodule UnderscoreEx.Predicates do
+  @moduledoc """
+  A collection of command predicate and command predicate generators.
+
+  All the generators return a function which takes a context `Map.t()`.
+
+  In case of success, a predicate should return `:passthrough`.
+
+  In case of failure, a predicate should return either `{:error}` or `{:error, reason}`.
+  """
+
   require Logger
 
+  @typedoc """
+  Result of a predicate.
+  """
+  @type result() :: :passthrough | {:error} | {:error, String.t()}
+
+  @typedoc """
+  A predicate.
+  """
+  @type predicate() :: (Map.t() -> result())
+
+  @doc """
+  Test predicate generator.
+
+  Always return whatever is given to it's generator.
+  """
   def test(ret), do: fn _ctx -> ret end
 
   def context(ctx) do
@@ -13,6 +38,10 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
+  @doc """
+  Check sif invoker is the bot owner.
+  """
+  @spec bot_owner(Map.t()) :: result()
   def bot_owner(%{message: message}) do
     with true <- UnderscoreEx.Core.get_owner() == message.author.id do
       :passthrough
@@ -21,6 +50,10 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
+  @doc """
+  Checks that keys are defined in the app environment.
+  """
+  @spec need_app_env([atom]) :: predicate()
   def need_app_env(keys) do
     fn %{unaliased_call_name: unaliased_call_name} ->
       missing =
@@ -47,6 +80,7 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
+  @spec perms([Nostrum.Permission.t()], :all | :any) :: predicate()
   def perms(perms, mode \\ :all) do
     fn %{message: message} = context ->
       with :passthrough <- context(:guild).(context),
@@ -102,6 +136,7 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
+  @deprecated "Use syslists for dynamic whitelisting"
   def guild(ids) do
     fn %{message: %{guild_id: guild_id}} ->
       case guild_id in ids do
@@ -111,6 +146,7 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
+  @deprecated "Use syslists for dynamic whitelisting"
   def user(ids) do
     fn %{message: %{author: %{id: id}}} ->
       case id in ids do
@@ -120,6 +156,7 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
+  @deprecated "Use syslists for dynamic whitelisting"
   def channel(ids) do
     fn %{message: %{channel_id: channel_id}} ->
       case channel_id in ids do
@@ -129,6 +166,7 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
+  @spec my_perms([Nostrum.Permission.t()], :all | :any) :: predicate()
   def my_perms(perms, mode \\ :all) do
     fn %{message: message} = context ->
       %{id: id} = Nostrum.Cache.Me.get()

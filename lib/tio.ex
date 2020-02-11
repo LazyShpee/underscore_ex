@@ -1,27 +1,35 @@
 defmodule TIO do
   require Logger
 
+  @spec init :: :ok
   def init() do
+    :inets.start()
     :ets.new(:tio, [:set, :public, :named_table])
 
     update_info()
   end
 
+  @spec update_info :: :ok
   def update_info() do
     Logger.info("Getting TIO info...")
     vars = get_info()
     Logger.info("Getting TIO languages...")
-    {:ok, %{body: body}} = HTTPoison.get(vars["baseURL"] <> vars["languagesURL"])
-    langs = body |> Poison.decode!()
+
+    {:ok, {_, _, body}} =
+      :httpc.request((vars["baseURL"] <> vars["languagesURL"]) |> String.to_charlist())
+
+    langs = body |> List.to_string() |> Poison.decode!()
     Logger.info("Found #{langs |> Map.keys() |> length()} languages.")
 
     :ets.insert(:tio, {:vars_cache, vars})
     :ets.insert(:tio, {:langs_cache, langs})
+
+    :ok
   end
 
   defp to_bin(a) do
     {i, _} = Integer.parse(a, 16)
-    <<i>>
+    i
   end
 
   defp make_token do
@@ -29,10 +37,15 @@ defmodule TIO do
   end
 
   @base "https://tio.run/"
-  def get_info do
-    {:ok, %{body: body}} = HTTPoison.get(@base)
-    [_match, fe_url] = Regex.run(~r|<script src="([^"]+\-frontend\.js)"|, body)
-    {:ok, %{body: body}} = HTTPoison.get(@base <> fe_url)
+  @spec get_info() :: map
+  def get_info() do
+    {:ok, {_, _, body}} = :httpc.request(@base |> String.to_charlist())
+
+    [_match, fe_url] =
+      Regex.run(~r|<script src="([^"]+\-frontend\.js)"|, body |> List.to_string())
+
+    {:ok, {_, _, body}} = :httpc.request((@base <> fe_url) |> String.to_charlist())
+    body = List.to_string(body)
 
     [languages_url] = Regex.run(~r|/static[^'"]+languages.json|, body)
 
@@ -57,24 +70,6 @@ defmodule TIO do
     "V#{name}\0#{length(data)}\0" <> Enum.join(data, "\0") <> "\0"
   end
 
-  @doc """
-  V<name><<0>><number of elements><<0>><element 1><<0>>[...]<element n><<0>>
-  F<name><<0>><number of characters><<0>><file data>
-  R
-
-  V lang -> language
-  V TIO_OPTIONS -> command line options
-  F .code.tio -> code contents
-  F .input.tio -> stdin
-  V args -> script arguments
-  R
-  |> deflate
-
-  https://github.com/TryItOnline/tryitonline/blob/3a6705314348a4e47d319c38025e11d845e4355c/usr/share/tio.run/frontend.js#L162
-  response |> slice(10)
-  |> inflate
-
-  """
   def make_payload(code, lang, options \\ []) do
     lang = [lang]
     input = Keyword.get(options, :input, "")
@@ -90,6 +85,7 @@ defmodule TIO do
       "R"
   end
 
+  @spec run(String.t(), String.t(), number, keyword) :: {:ok, [String.t()]}
   def run(code, lang, session_id \\ 0, options \\ []) do
     [{_, vars}] = :ets.lookup(:tio, :vars_cache)
 
@@ -98,15 +94,28 @@ defmodule TIO do
         nil
 
       [{_, token}] ->
-        HTTPoison.get(vars["baseURL"] <> vars["quitURL"] <> "/#{token}")
+        :httpc.request(
+          (vars["baseURL"] <> vars["quitURL"] <> "/#{token}")
+          |> to_charlist()
+        )
     end
 
-    deflated_payload = make_payload(code, lang, options) |> :zlib.gzip() |> String.slice(10..-1)
+    deflated_payload =
+      make_payload(code, lang, options)
+      |> :zlib.gzip()
+      |> String.slice(10..-1)
+
     token = make_token()
     :ets.insert(:tio, {session_id, token})
 
-    {:ok, %{body: body}} =
-      HTTPoison.post(vars["baseURL"] <> vars["runURL"] <> "/#{token}", deflated_payload)
+    {:ok, {_, _, body}} =
+      :httpc.request(
+        :post,
+        {(vars["baseURL"] <> vars["runURL"] <> "/#{token}") |> String.to_charlist(), [],
+         'text/plain', deflated_payload},
+        [],
+        []
+      )
 
     :ets.delete(:tio, session_id)
 

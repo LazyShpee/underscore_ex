@@ -1,4 +1,5 @@
 defmodule UnderscoreEx.Schema.SysListEntry do
+  @moduledoc false
   use Ecto.Schema
 
   schema "sys_list" do

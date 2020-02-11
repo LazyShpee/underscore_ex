@@ -38,7 +38,8 @@ defmodule UnderscoreEx.Command.Emoji.Network.Create do
   end
 
   @impl true
-  def call(context, _args), do: UnderscoreEx.Command.Help.call(context, context.unaliased_call_name)
+  def call(context, _args),
+    do: UnderscoreEx.Command.Help.call(context, context.unaliased_call_name)
 
   @impl true
   def usage,
