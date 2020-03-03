@@ -38,7 +38,8 @@ defmodule UnderscoreEx.MixProject do
       {:timex, "~> 3.6"},
       {:exredis, ">= 0.2.4"},
       {:rambo, "~> 0.2"},
-      {:rcon, "~> 0.3.0"}
+      {:rcon, "~> 0.3.0"},
+      {:erlcron, git: "https://github.com/erlware/erlcron.git"}
     ]
   end
 end

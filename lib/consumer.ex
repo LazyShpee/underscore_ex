@@ -90,11 +90,16 @@ defmodule UnderscoreEx.Consumer do
               )
           },
           Command.Emoji
-        )
+        ),
+      "role" =>
+        group(%{
+          "permview" => Command.Role.PermView
+        })
     }
     |> Core.put_commands()
 
     Core.fetch_owner()
+    Command.Creajam.init()
   end
 
   def my_handle_event(_event) do
