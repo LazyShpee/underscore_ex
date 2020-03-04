@@ -27,3 +27,6 @@ underscore_ex-*.tar
 /.elixir_ls
 
 /test.exs
+
+# mac suck my balls :)
+.DS_Store

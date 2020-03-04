@@ -136,7 +136,7 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
-  @deprecated "Use syslists for dynamic whitelisting"
+  # @deprecated "Use syslists for dynamic whitelisting"
   def guild(ids) do
     fn %{message: %{guild_id: guild_id}} ->
       case guild_id in ids do
@@ -146,7 +146,7 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
-  @deprecated "Use syslists for dynamic whitelisting"
+  # @deprecated "Use syslists for dynamic whitelisting"
   def user(ids) do
     fn %{message: %{author: %{id: id}}} ->
       case id in ids do
@@ -156,7 +156,7 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
-  @deprecated "Use syslists for dynamic whitelisting"
+  # @deprecated "Use syslists for dynamic whitelisting"
   def channel(ids) do
     fn %{message: %{channel_id: channel_id}} ->
       case channel_id in ids do
