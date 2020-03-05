@@ -10,6 +10,7 @@ defmodule UnderscoreEx.Schema.Creajam do
     field(:participation_count, :integer, default: 0)
     field(:number, :integer, default: 1)
     field(:is_test, :boolean, default: false)
+    field(:ended, :boolean, default: false)
 
     timestamps()
   end
@@ -23,7 +24,8 @@ defmodule UnderscoreEx.Schema.Creajam do
       :theme,
       :participation_count,
       :number,
-      :is_test
+      :is_test,
+      :ended
     ])
   end
 end

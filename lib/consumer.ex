@@ -16,6 +16,14 @@ defmodule UnderscoreEx.Consumer do
     UnderscoreEx.Command.Private.RCon.handle_message(message)
   end
 
+  def my_handle_event({:MESSAGE_REACTION_ADD, data, _ws_state}) do
+    UnderscoreEx.Command.Creajam.handle_reaction(:add, data)
+  end
+
+  def my_handle_event({:MESSAGE_REACTION_REMOVE, data, _ws_state}) do
+    UnderscoreEx.Command.Creajam.handle_reaction(:remove, data)
+  end
+
   def my_handle_event({:READY, _, _ws_state}) do
     alias UnderscoreEx.Command
     import UnderscoreEx.Core
@@ -105,10 +113,9 @@ defmodule UnderscoreEx.Consumer do
     |> Core.put_commands()
 
     Core.fetch_owner()
-    Command.Creajam.init()
   end
 
-  def my_handle_event(_event) do
+  def my_handle_event({_type, _data, _ws_state}) do
     :noop
   end
 

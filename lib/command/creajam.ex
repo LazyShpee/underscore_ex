@@ -3,6 +3,7 @@ defmodule UnderscoreEx.Command.Creajam do
   use UnderscoreEx.Command
   alias UnderscoreEx.Repo
   alias UnderscoreEx.Schema
+  require Logger
 
   @impl true
   def predicates, do: [UnderscoreEx.Predicates.guild([684_401_012_345_536_593])]
@@ -10,7 +11,43 @@ defmodule UnderscoreEx.Command.Creajam do
   @impl true
   defdelegate call(context, args), to: UnderscoreEx.Command.GroupHelper
 
+  def handle_reaction(:add, %{
+        channel_id: channel_id,
+        message_id: message_id,
+        emoji: %{id: emoji_id},
+        guild_id: guild_id,
+        user_id: user_id
+      }) do
+    import Ecto.Query
+
+    config = Application.get_env(:underscore_ex, Creajam)
+
+    if channel_id === config[:theme] and
+         emoji_id === config[:action_emoji] do
+      Schema.Creajam
+      |> where(theme_message_id: ^message_id)
+      |> Repo.one()
+      |> case do
+        %Schema.Creajam{} ->
+          %{roles: roles} = Nostrum.Api.get_guild_member!(guild_id, user_id)
+
+          Nostrum.Api.modify_guild_member!(guild_id, user_id,
+            roles: [config[:participant_role] | roles] |> Enum.uniq()
+          )
+
+        nil ->
+          :ok
+      end
+    end
+  end
+
+  def handle_reaction(_type, _data) do
+    :ok
+  end
+
   def init do
+    Logger.info("Initialising creajam")
+
     :erlcron.cron(
       :weekly_theme_new,
       {{:weekly, :mon, {0, :am}}, {UnderscoreEx.Command.Creajam, :new_theme, []}}
@@ -18,9 +55,11 @@ defmodule UnderscoreEx.Command.Creajam do
 
     :erlcron.cron(
       :weekly_theme_archive,
-      {{:weekly, :sun, {11, 42, :pm}}, {UnderscoreEx.Command.Creajam, :archive_theme, []}}
+      {{:weekly, :mon, {11, 42, :pm}}, {UnderscoreEx.Command.Creajam, :archive_theme, []}}
     )
   end
+
+  # def handle_emoji
 
   def generate_theme() do
     ["adjectives.txt", "nouns.txt"]
@@ -30,33 +69,55 @@ defmodule UnderscoreEx.Command.Creajam do
     |> Enum.join(" ")
   end
 
-  def new_theme do
-    sub_cat =
-      Nostrum.Cache.ChannelCache.get!(Application.get_env(:underscore_ex, Creajam)[:rendu])
+  def new_theme(opts \\ []) do
+    config = Application.get_env(:underscore_ex, Creajam)
+
+    sub_cat = Nostrum.Cache.ChannelCache.get!(config[:rendu])
 
     guild = Nostrum.Cache.GuildCache.get!(sub_cat.guild_id)
 
-    theme = generate_theme()
+    theme = if is_nil(opts[:theme]), do: generate_theme(), else: opts[:theme]
 
     channel =
-      Nostrum.Api.create_guild_channel!(guild.id,
-        parent_id: Application.get_env(:underscore_ex, Creajam)[:rendu],
-        name: theme,
-        topic: theme
-      )
+      if is_nil(opts[:channel_id]) do
+        Nostrum.Api.create_guild_channel!(guild.id,
+          parent_id: sub_cat.id,
+          name: theme,
+          topic: theme
+        )
+      else
+        chan = Nostrum.Cache.ChannelCache.get!(opts[:channel_id])
+
+        Nostrum.Api.modify_channel!(chan.id,
+          parent_id: sub_cat.id,
+          permission_overwrites: sub_cat.permission_overwrites,
+          topic: theme,
+          name: theme
+        )
+      end
 
     number = get_current_number!() + 1
 
+    Nostrum.Api.modify_guild_role!(guild.id, config[:ping_role], mentionable: true)
+
     message =
-      Nostrum.Api.create_message!(Application.get_env(:underscore_ex, Creajam)[:theme], %{
-        content: "<@&#{Application.get_env(:underscore_ex, Creajam)[:ping_role]}>",
+      Nostrum.Api.create_message!(config[:theme], %{
+        content: if(Mix.env() === :dev, do: "@ping", else: "<@&#{config[:ping_role]}>"),
         embed: %Nostrum.Struct.Embed{
           title:
             Timex.now("Europe/Paris")
             |> Timex.format!("Creajam ##{number}, annee {YYYY} semaine {Wiso}"),
-          description: "Le theme est \"#{theme}\"\nLe rendu se fait dans <##{channel.id}>"
+          description: """
+          Le theme est \"#{theme}\"
+          Le rendu se fait dans <##{channel.id}>
+          Reagissez avec <:emoji:#{config[:action_emoji]}> pour indiquer votre envie de participer
+          """
         }
       })
+
+    Nostrum.Api.modify_guild_role!(guild.id, config[:ping_role], mentionable: false)
+
+    Nostrum.Api.create_reaction!(message.channel_id, message.id, "emoji:#{config[:action_emoji]}")
 
     Repo.insert!(%Schema.Creajam{
       theme_channel_id: message.channel_id,
@@ -68,7 +129,7 @@ defmodule UnderscoreEx.Command.Creajam do
     })
 
     :ok
-  catch
+  rescue
     _ -> "An error occured while attempting to create a new theme" |> IO.inspect()
   end
 
@@ -92,11 +153,11 @@ defmodule UnderscoreEx.Command.Creajam do
   end
 
   def archive_theme do
-    sub_cat =
-      Nostrum.Cache.ChannelCache.get!(Application.get_env(:underscore_ex, Creajam)[:rendu])
+    config = Application.get_env(:underscore_ex, Creajam)
 
-    archive_cat =
-      Nostrum.Cache.ChannelCache.get!(Application.get_env(:underscore_ex, Creajam)[:archive])
+    sub_cat = Nostrum.Cache.ChannelCache.get!(config[:rendu])
+
+    archive_cat = Nostrum.Cache.ChannelCache.get!(config[:archive])
 
     guild = Nostrum.Cache.GuildCache.get!(sub_cat.guild_id)
 
@@ -118,7 +179,7 @@ defmodule UnderscoreEx.Command.Creajam do
           subs = get_submissions!(id)
           participation_count = subs |> length()
 
-          Schema.Creajam.changeset(jam, %{participation_count: participation_count})
+          Schema.Creajam.changeset(jam, %{participation_count: participation_count, ended: true})
           |> Repo.update!()
 
           message = Nostrum.Api.get_channel_message!(jam.theme_channel_id, jam.theme_message_id)
@@ -128,28 +189,48 @@ defmodule UnderscoreEx.Command.Creajam do
              |> hd())
             | fields: [
                 %Nostrum.Struct.Embed.Field{
-                  name: "Participants finaux",
-                  value: participation_count
+                  name: "Inscriptions",
+                  value: guild.members |> Enum.filter(fn {_, %{roles: roles}} -> config[:participant_role] in roles end) |> length(),
+                  inline: true
+                },
+                %Nostrum.Struct.Embed.Field{
+                  name: "Participations",
+                  value: participation_count,
+                  inline: true
                 },
                 %Nostrum.Struct.Embed.Field{
                   name: "Participants",
-                  value: case subs do
-                    [] -> "Personne :("
-                    subs -> subs |> Enum.join(" ")
-                  end
+                  value:
+                    case subs do
+                      [] -> "Personne :("
+                      subs -> subs |> Enum.join(" ")
+                    end
                 }
-              ]
+              ],
+              footer: %Nostrum.Struct.Embed.Footer{
+                text: "Cette jam est terminee"
+              }
           }
 
           Nostrum.Api.edit_message!(jam.theme_channel_id, jam.theme_message_id, embed: embed)
+          Nostrum.Api.delete_all_reactions!(jam.theme_channel_id, jam.theme_message_id)
 
         _ ->
           :ok
       end
     end)
 
+    guild.members
+    |> Enum.each(fn {id, %{roles: roles}} ->
+      if config[:participant_role] in roles do
+        Nostrum.Api.modify_guild_member!(guild.id, id,
+          roles: roles |> Enum.reject(&(&1 == config[:participant_role]))
+        )
+      end
+    end)
+
     :ok
-  catch
+  rescue
     _ -> "An error occured while attempting to archive a theme" |> IO.inspect()
   end
 
