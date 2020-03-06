@@ -18,7 +18,6 @@ scared
 additional
 emotional
 old
-political
 similar
 financial
 medical
@@ -240,7 +239,6 @@ squealing
 descriptive
 old-fashioned
 squalid
-racial
 redundant
 domineering
 habitual
@@ -284,7 +282,6 @@ joyous
 troubled
 bent
 elite
-bawdy
 valuable
 fanatical
 trashy
@@ -743,7 +740,6 @@ agonizing
 gruesome
 giant
 noiseless
-lewd
 measly
 far-flung
 disillusioned
@@ -926,7 +922,6 @@ heady
 uttermost
 ill-fated
 labored
-true
 unwieldy
 eminent
 overjoyed
@@ -952,7 +947,6 @@ abstracted
 greedy
 direful
 wide-eyed
-false
 lumpy
 naive
 eatable
@@ -967,7 +961,6 @@ bad
 spotless
 lazy
 jumbled
-furry
 abnormal
 spiky
 longing
@@ -1010,7 +1003,6 @@ spotted
 previous
 confused
 gigantic
-obese
 easy
 elated
 warlike
@@ -1047,7 +1039,6 @@ tricky
 delicate
 volatile
 staking
-known
 vast
 coordinated
 fretful
