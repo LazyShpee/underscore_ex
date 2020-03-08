@@ -55,11 +55,9 @@ defmodule UnderscoreEx.Command.Creajam do
 
     :erlcron.cron(
       :weekly_theme_archive,
-      {{:weekly, :mon, {11, 42, :pm}}, {UnderscoreEx.Command.Creajam, :archive_theme, []}}
+      {{:weekly, :sun, {11, 42, :pm}}, {UnderscoreEx.Command.Creajam, :archive_theme, []}}
     )
   end
-
-  # def handle_emoji
 
   def generate_theme() do
     ["adjectives.txt", "nouns.txt"]
@@ -130,7 +128,7 @@ defmodule UnderscoreEx.Command.Creajam do
 
     :ok
   rescue
-    _ -> "An error occured while attempting to create a new theme" |> IO.inspect()
+    e -> e |> IO.inspect() |> inspect()
   end
 
   def get_submissions!(channel_id) do
@@ -190,7 +188,12 @@ defmodule UnderscoreEx.Command.Creajam do
             | fields: [
                 %Nostrum.Struct.Embed.Field{
                   name: "Inscriptions",
-                  value: guild.members |> Enum.filter(fn {_, %{roles: roles}} -> config[:participant_role] in roles end) |> length(),
+                  value:
+                    guild.members
+                    |> Enum.filter(fn {_, %{roles: roles}} ->
+                      config[:participant_role] in roles
+                    end)
+                    |> length(),
                   inline: true
                 },
                 %Nostrum.Struct.Embed.Field{
@@ -231,7 +234,7 @@ defmodule UnderscoreEx.Command.Creajam do
 
     :ok
   rescue
-    _ -> "An error occured while attempting to archive a theme" |> IO.inspect()
+    e -> e |> IO.inspect() |> inspect()
   end
 
   defmodule RerollMeme do
