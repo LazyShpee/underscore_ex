@@ -435,4 +435,26 @@ defmodule UnderscoreEx.Util do
   def request(method, url, body, header, options) do
     HTTPoison.request(method, url, body, [{"Content-Type", "application/json"} | header], options)
   end
+
+  def bulk(actions) when is_list(actions) do
+    Enum.map(actions, &bulk/1)
+  end
+
+  def bulk(action), do: bulk(action, 0)
+
+  def bulk(action, iteration) when iteration < 3 do
+    action.()
+    |> case do
+      {:error, %Nostrum.Error.ApiError{response: %{retry_after: ms}, status_code: 429}} ->
+        receive do
+        after
+          ms + 50 -> bulk(action, iteration + 1)
+        end
+        result -> result
+    end
+  end
+
+  def bulk(_, _) do
+    {:error, :max_iteration_reached}
+  end
 end
