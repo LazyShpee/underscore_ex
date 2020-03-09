@@ -75,7 +75,7 @@ defmodule UnderscoreEx.Command.Emoji do
 
   def get_one_emoji(guild_id, query) do
     emoji_id =
-      [~r/<a?:[^:]+:(\d+)>/, ~r|https://cdn.discordapp.com/emojis/(\d+)(?:\?.*)?|, ~r/(\d{15,})/]
+      [~r/<a?:\w+:(\d+)>/, ~r|https://cdn.discordapp.com/emojis/(\d+)(?:\?.*)?|, ~r/(\d{15,})/]
       |> Enum.reduce_while(0, fn r, acc ->
         case r |> Regex.run(query) do
           [_, id] -> {:halt, id |> String.to_integer()}
@@ -84,7 +84,7 @@ defmodule UnderscoreEx.Command.Emoji do
       end)
 
     emoji_name =
-      case ~r/<a?:([^:]+):\d+>/ |> Regex.run(query) do
+      case ~r/<a?:(\w+):\d+>/ |> Regex.run(query) do
         [_, name] -> name
         _ -> query
       end
@@ -92,7 +92,7 @@ defmodule UnderscoreEx.Command.Emoji do
     with {:ok, %{emojis: emojis}} <- Nostrum.Cache.GuildCache.get(guild_id),
          [emoji] <-
            Enum.filter(emojis, fn e ->
-             e.name == emoji_name or (e.id == emoji_id and e.managed != true)
+             (emoji_id == 0 and e.name == emoji_name) or (e.id == emoji_id and e.managed != true)
            end) do
       {:ok, emoji}
     else

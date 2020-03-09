@@ -1,6 +1,6 @@
 defmodule UnderscoreEx.Command.Emoji.Add do
   use UnderscoreEx.Command
-  import UnderscoreEx.Command.Emoji
+  import UnderscoreEx.Command.Emoji, except: [call: 2]
   alias UnderscoreEx.Util
 
   defp get_emoji_url_from_message(rest, message) do
@@ -26,6 +26,7 @@ defmodule UnderscoreEx.Command.Emoji.Add do
   @impl true
   def usage,
     do: [
+      ":emoji:",
       "<destination> [source]",
       "<guild id>/<emoji name> [source]",
       "<network id>/<guild id>/<emoji name> [source]"
@@ -38,6 +39,14 @@ defmodule UnderscoreEx.Command.Emoji.Add do
       |> destructure(arg |> String.split(" ", parts: 2, trim: true))
       |> Enum.map(&(&1 || ""))
       |> List.to_tuple()
+
+  @impl true
+  def call(context, {emoji, ""}) do
+    case Regex.run(~r/^<a?:(\w+):(\d+)>$/, emoji) do
+      [_, name, _] -> call(context, {name, emoji})
+      nil -> :ok
+    end
+  end
 
   @impl true
   def call(context, {path, rest}) do
