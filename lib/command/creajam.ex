@@ -145,7 +145,7 @@ defmodule UnderscoreEx.Command.Creajam do
     |> last(:number)
     |> Repo.one()
     |> case do
-      {:ok, %{number: number}} -> number
+      %{number: number} -> number
       _ -> 0
     end
   end
@@ -226,11 +226,11 @@ defmodule UnderscoreEx.Command.Creajam do
     guild.members
     |> Enum.each(fn {id, %{roles: roles}} ->
       if config[:participant_role] in roles do
-        Nostrum.Api.modify_guild_member!(guild.id, id,
-          roles: roles |> Enum.reject(&(&1 == config[:participant_role]))
-        )
+        fn -> Nostrum.Api.modify_guild_member(guild.id, id, roles: roles -- [config[:participant_role]]) end
       end
     end)
+    |> Enum.reject(&is_nil/1)
+    |> UnderscoreEx.Util.bulk()
 
     :ok
   rescue

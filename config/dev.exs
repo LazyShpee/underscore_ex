@@ -13,5 +13,5 @@ config :underscore_ex, Creajam,
   log: 684415778090647618,
   ping_role: 684402967100522602,
   lurker_role: 685044509733945355,
-  participant_role: 685044556302909440,
+  participant_role: 686504640501514268,
   action_emoji: 684422183858339841
