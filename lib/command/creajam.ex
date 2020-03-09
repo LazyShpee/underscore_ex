@@ -226,7 +226,11 @@ defmodule UnderscoreEx.Command.Creajam do
     guild.members
     |> Enum.each(fn {id, %{roles: roles}} ->
       if config[:participant_role] in roles do
-        fn -> Nostrum.Api.modify_guild_member(guild.id, id, roles: roles -- [config[:participant_role]]) end
+        fn ->
+          Nostrum.Api.modify_guild_member(guild.id, id,
+            roles: roles -- [config[:participant_role]]
+          )
+        end
       end
     end)
     |> Enum.reject(&is_nil/1)
