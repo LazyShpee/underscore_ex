@@ -450,7 +450,9 @@ defmodule UnderscoreEx.Util do
         after
           ms + 50 -> bulk(action, iteration + 1)
         end
-        result -> result
+
+      result ->
+        result
     end
   end
 

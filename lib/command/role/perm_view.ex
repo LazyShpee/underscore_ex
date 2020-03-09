@@ -6,7 +6,9 @@ defmodule UnderscoreEx.Command.Role.PermView do
 
     guild.roles
     |> Enum.sort_by(fn {_id, %{position: position}} -> position end, &>=/2)
-    |> Enum.map(fn {_id, %{permissions: permissions, name: name}} -> "#{name |> :http_uri.encode()}=#{permissions}" end)
+    |> Enum.map(fn {_id, %{permissions: permissions, name: name}} ->
+      "#{name |> :http_uri.encode()}=#{permissions}"
+    end)
     |> Enum.join("&")
     |> IO.inspect()
 

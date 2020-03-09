@@ -9,26 +9,28 @@ defmodule UnderscoreEx.Command.Eval do
     ]
 
   @impl true
-  def usage, do: [
-    "eval [-#{flags() |> Map.keys() |> Enum.join()}] <code>"
-  ]
+  def usage,
+    do: [
+      "eval [-#{flags() |> Map.keys() |> Enum.join()}] <code>"
+    ]
 
+  def description,
+    do: """
+    **Flags :**
+    #{flags() |> Enum.map(fn {f, d} -> "  `#{f}` - #{d}" end) |> Enum.join("\n")}
+    """
 
-  def description, do: """
-  **Flags :**
-  #{flags() |> Enum.map(fn {f, d} -> "  `#{f}` - #{d}" end) |> Enum.join("\n")}
-  """
-
-  defp flags, do: %{
-    "s" => "silent",
-    "r" => "no syntax highlighting",
-    "R" => "no codeblock",
-    "e" => "escapes for discord",
-    "E" => "double escapes for discord",
-    "Q" => "import database utils",
-    "g" => "include guild variable",
-    "c" => "include channel variable",
-  }
+  defp flags,
+    do: %{
+      "s" => "silent",
+      "r" => "no syntax highlighting",
+      "R" => "no codeblock",
+      "e" => "escapes for discord",
+      "E" => "double escapes for discord",
+      "Q" => "import database utils",
+      "g" => "include guild variable",
+      "c" => "include channel variable"
+    }
 
   defp find_code(content) do
     [
@@ -47,17 +49,17 @@ defmodule UnderscoreEx.Command.Eval do
 
   @impl true
   def call(context, _args) do
-
     %{"opts" => opts, "rest" => rest} =
       Regex.named_captures(~r/^\s*(-(?<opts>[a-zA-Z]+)\s+)?(?<rest>.+)/sm, context.rest)
+
     opts = opts |> String.split("")
 
     variables = [
       message: context.message,
       rest: context.rest,
       context: context,
-      guild: (if "g" in opts, do: Nostrum.Cache.GuildCache.get!(context.message.guild_id)),
-      channel: (if "c" in opts, do: Nostrum.Cache.ChannelCache.get!(context.message.channel_id)),
+      guild: if("g" in opts, do: Nostrum.Cache.GuildCache.get!(context.message.guild_id)),
+      channel: if("c" in opts, do: Nostrum.Cache.ChannelCache.get!(context.message.channel_id))
     ]
 
     headers = ~s"""
@@ -70,6 +72,7 @@ defmodule UnderscoreEx.Command.Eval do
 
       code ->
         result = Util.eval(variables, headers <> "\n" <> code)
+
         if not ("s" in opts) do
           if "R" in opts do
             cond do
@@ -77,9 +80,11 @@ defmodule UnderscoreEx.Command.Eval do
                 result
                 |> UnderscoreEx.Util.escape_discord()
                 |> UnderscoreEx.Util.escape_discord()
+
               "e" in opts ->
                 result
                 |> UnderscoreEx.Util.escape_discord()
+
               true ->
                 result
             end

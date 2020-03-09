@@ -104,11 +104,14 @@ defmodule UnderscoreEx.Consumer do
           "permview" => Command.Role.PermView
         }),
       "creajam" =>
-        group(%{
-          "reroll" => Command.Creajam.RerollMeme,
-          "noreroll" => Command.Creajam.NoRerollMeme,
-          "gentheme" => Command.Creajam.GenTheme
-        }, Command.Creajam)
+        group(
+          %{
+            "reroll" => Command.Creajam.RerollMeme,
+            "noreroll" => Command.Creajam.NoRerollMeme,
+            "gentheme" => Command.Creajam.GenTheme
+          },
+          Command.Creajam
+        )
     }
     |> Core.put_commands()
 
