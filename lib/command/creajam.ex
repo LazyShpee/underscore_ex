@@ -246,6 +246,9 @@ defmodule UnderscoreEx.Command.Creajam do
     use UnderscoreEx.Command
 
     @impl true
+    defdelegate predicates, to: UnderscoreEx.Command.Creajam
+
+    @impl true
     def call(_context, _args), do: "Ok chef, on reroll"
   end
 
@@ -254,12 +257,18 @@ defmodule UnderscoreEx.Command.Creajam do
     use UnderscoreEx.Command
 
     @impl true
+    defdelegate predicates, to: UnderscoreEx.Command.Creajam
+
+    @impl true
     def call(_context, _args), do: "Ok chef, on reroll plus"
   end
 
   defmodule GenTheme do
     @moduledoc false
     use UnderscoreEx.Command
+
+    @impl true
+    defdelegate predicates, to: UnderscoreEx.Command.Creajam
 
     @impl true
     def call(_context, _args), do: UnderscoreEx.Command.Creajam.generate_theme()

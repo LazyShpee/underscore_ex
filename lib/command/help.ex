@@ -86,7 +86,8 @@ defmodule UnderscoreEx.Command.Help do
       end
 
     fields =
-      with {:ok, command} <- Core.get_command(result |> elem(2)) do
+      with {:ok, command} <- Core.get_command(result |> elem(2)),
+           {:ok} <- Core.check_predicates(command, context) do
         [] ++
           [
             %Nostrum.Struct.Embed.Field{

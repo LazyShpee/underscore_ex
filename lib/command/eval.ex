@@ -29,7 +29,8 @@ defmodule UnderscoreEx.Command.Eval do
       "E" => "double escapes for discord",
       "Q" => "import database utils",
       "g" => "include guild variable",
-      "c" => "include channel variable"
+      "c" => "include channel variable",
+      "o" => "no ouput inspect"
     }
 
   defp find_code(content) do
@@ -71,7 +72,7 @@ defmodule UnderscoreEx.Command.Eval do
         Util.usage("<some elixir code here>", context)
 
       code ->
-        result = Util.eval(variables, headers <> "\n" <> code)
+        result = Util.eval(variables, headers <> "\n" <> code, (if "o" in opts, do: :raw, else: :inspect))
 
         if not ("s" in opts) do
           if "R" in opts do

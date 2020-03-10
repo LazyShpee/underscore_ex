@@ -195,7 +195,7 @@ defmodule UnderscoreEx.Util do
   Evaluates a snippet of elixir code.
   """
   @spec eval(keyword(), String.t()) :: String.t()
-  def eval(env, to_eval) do
+  def eval(env, to_eval, mode \\ :inspect) do
     evald =
       try do
         to_eval
@@ -205,16 +205,18 @@ defmodule UnderscoreEx.Util do
       end
 
     evald
-    |> eval_message
+    |> eval_message(mode)
   end
 
-  defp eval_message({:error, e, stack}),
+  defp eval_message({:error, e, stack}, _mode),
     do:
       "** (#{inspect(e.__struct__)}) #{apply(e.__struct__, :message, [e])}\n\n#{inspect(e)}\n#{
         inspect(stack)
       }"
 
-  defp eval_message({evald, _}), do: "#{inspect(evald)}"
+  defp eval_message({evald, _}, :inspect), do: "#{inspect(evald)}"
+
+  defp eval_message({evald, _}, :raw), do: evald
 
   @doc """
   Converts a discord snowflake (user id, channel id, role id, etc.) to a unix timestamp.
