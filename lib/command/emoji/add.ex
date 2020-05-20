@@ -26,7 +26,7 @@ defmodule UnderscoreEx.Command.Emoji.Add do
   @impl true
   def usage,
     do: [
-      ":emoji:",
+      ":emoji: [$]",
       "<destination> [source]",
       "<guild id>/<emoji name> [source]",
       "<network id>/<guild id>/<emoji name> [source]"
@@ -41,7 +41,7 @@ defmodule UnderscoreEx.Command.Emoji.Add do
       |> List.to_tuple()
 
   @impl true
-  def call(context, {emoji, ""}) do
+  def call(context, {emoji, "$"}) do
     case Regex.run(~r/^<a?:(\w+):(\d+)>$/, emoji) do
       [_, name, _] -> call(context, {name, emoji})
       nil -> :ok
