@@ -50,13 +50,17 @@ defmodule UnderscoreEx.Command.Creajam do
 
     :erlcron.cron(
       :weekly_theme_new,
-      {{:weekly, :mon, {0, :am}}, {UnderscoreEx.Command.Creajam, :new_theme, []}}
+      {{:weekly, :mon, {0, :am}}, {UnderscoreEx.Command.Creajam, :debug, ["new theme"]}}
     )
 
     :erlcron.cron(
       :weekly_theme_archive,
-      {{:weekly, :sun, {11, 42, :pm}}, {UnderscoreEx.Command.Creajam, :archive_theme, []}}
+      {{:weekly, :sun, {11, 42, :pm}}, {UnderscoreEx.Command.Creajam, :debug, ["archive theme"]}}
     )
+  end
+
+  def debug(message) do
+    IO.inspect(message)
   end
 
   def generate_theme() do
