@@ -60,7 +60,8 @@ defmodule UnderscoreEx.Command.Creajam do
   end
 
   def debug(message) do
-    IO.inspect(message)
+    now = Timex.now()
+    IO.inspect({now, now |> Timex.weekday, message})
   end
 
   def generate_theme() do
