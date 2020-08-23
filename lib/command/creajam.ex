@@ -50,21 +50,31 @@ defmodule UnderscoreEx.Command.Creajam do
 
     :erlcron.cron(
       :weekly_theme_new,
-      {{:weekly, :mon, {0, :am}}, {UnderscoreEx.Command.Creajam, :debug, ["new theme"]}}
+      {{:weekly, :mon, {0, :am}}, {UnderscoreEx.Command.Creajam, :cron_new_theme, []}}
     )
 
     :erlcron.cron(
       :weekly_theme_archive,
-      {{:weekly, :sun, {11, 42, :pm}}, {UnderscoreEx.Command.Creajam, :debug, ["archive theme"]}}
+      {{:weekly, :sun, {11, 42, :pm}}, {UnderscoreEx.Command.Creajam, :cron_archive_theme, []}}
     )
   end
 
   def debug(message) do
     now = Timex.now()
-    IO.inspect({now, now |> Timex.weekday, message})
+    IO.inspect({now, now |> Timex.weekday(), message})
   end
 
-  def generate_theme() do
+  def cron_new_theme do
+    debug("new_theme")
+    if Timex.now() |> Timex.weekday() == 7, do: new_theme()
+  end
+
+  def cron_archive_theme do
+    debug("archive_theme")
+    if Timex.now() |> Timex.weekday() == 7, do: archive_theme()
+  end
+
+  def generate_theme do
     ["adjectives.txt", "nouns.txt"]
     |> Enum.map(fn file ->
       File.read!("./resources/#{file}") |> String.split("\n") |> Enum.random()
