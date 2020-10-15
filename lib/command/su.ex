@@ -22,7 +22,7 @@ defmodule UnderscoreEx.Command.Su do
 
   @impl true
   def parse_args(arg) do
-    [options, command] = arg |> String.split("--", trim: true, parts: 2)
+    [options, command] = arg |> String.split(" -- ", trim: true, parts: 2)
 
     {options, _} =
       options
