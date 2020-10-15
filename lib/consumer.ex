@@ -29,6 +29,7 @@ defmodule UnderscoreEx.Consumer do
     %{
       "im" => Command.IM,
       # Public commands
+      "text" => Command.Text,
       "chrole" => Command.ChRole,
       "code" => Command.Code,
       "tio" => Command.TIO,
@@ -112,6 +113,30 @@ defmodule UnderscoreEx.Consumer do
     |> Core.put_commands()
 
     Core.fetch_owner()
+  end
+
+  def my_handle_event(
+        {:VOICE_STATE_UPDATE,
+         %{user_id: user_id, session_id: session_id, guild_id: guild_id, channel_id: channel_id},
+         _ws_state}
+      )
+      when not is_nil(channel_id) do
+    %{id: id} = Nostrum.Cache.Me.get()
+
+    if id === user_id do
+      Core.EventRegistry.subscribe()
+
+      receive do
+        {:discord, {:VOICE_SERVER_UPDATE, %{guild_id: ^guild_id} = event}} ->
+          Apatite.voice_server_update(session_id, event)
+      end
+
+      Core.EventRegistry.unsubscribe(:nokill)
+    end
+  end
+
+  def my_handle_event({:VOICE_SERVER_UPDATE, data, _ws_state}) do
+    IO.inspect(data)
   end
 
   def my_handle_event({_type, _data, _ws_state}) do
