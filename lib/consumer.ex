@@ -27,9 +27,10 @@ defmodule UnderscoreEx.Consumer do
     import UnderscoreEx.Core
 
     %{
-      "stack" => Command.Stack,
       "im" => Command.IM,
       # Public commands
+      "info" => Command.Info,
+      "stack" => Command.Stack,
       "text" => Command.Text,
       "chrole" => Command.ChRole,
       "code" => Command.Code,
