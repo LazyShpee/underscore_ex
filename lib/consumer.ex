@@ -27,6 +27,7 @@ defmodule UnderscoreEx.Consumer do
     import UnderscoreEx.Core
 
     %{
+      "stack" => Command.Stack,
       "im" => Command.IM,
       # Public commands
       "text" => Command.Text,
@@ -98,7 +99,8 @@ defmodule UnderscoreEx.Consumer do
         ),
       "role" =>
         group(%{
-          "permview" => Command.Role.PermView
+          "permview" => Command.Role.PermView,
+          "info" => Command.Role.Info
         }),
       "creajam" =>
         group(

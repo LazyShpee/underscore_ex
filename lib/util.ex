@@ -39,7 +39,7 @@ defmodule UnderscoreEx.Util do
    - a username#discriminator combo (case insensitive)
    - a similarity search against username and nickname
   """
-  @spec resolve_user_id(String.t(), Nostrum.Struct.Guild.t() | integer()) ::
+  @spec resolve_user_id(String.t(), Nostrum.Struct.Guild.t() | integer() | nil) ::
           {:error, atom} | {:ok, integer}
   def resolve_user_id(query, guild_id) when is_number(guild_id) do
     resolve_user_id(query, GuildCache.get!(guild_id))
@@ -132,7 +132,7 @@ defmodule UnderscoreEx.Util do
    - a mention
    - a similarity search against name
   """
-  @spec resolve_channel_id(String.t(), Nostrum.Struct.Guild.t() | integer) ::
+  @spec resolve_channel_id(String.t(), Nostrum.Struct.Guild.t() | integer | nil) ::
           {:error, atom} | {:ok, integer}
 
   def resolve_channel_id(query, %Nostrum.Struct.Guild{} = guild) do
@@ -156,7 +156,7 @@ defmodule UnderscoreEx.Util do
     end
   end
 
-  def resolve_channel_id_by_raw_id(query) do
+  defp resolve_channel_id_by_raw_id(query) do
     case Regex.run(~r/\d+/, query) do
       [id] -> {:ok, id |> String.to_integer()}
       _ -> {:error, :not_found}
@@ -167,6 +167,63 @@ defmodule UnderscoreEx.Util do
     closest_match =
       Enum.reduce(guild.channels, {nil, @min_jaro}, fn {new_id, channel}, {_, old_d} = old ->
         new_d = String.jaro_distance(query, channel.name)
+
+        cond do
+          new_d > old_d -> {new_id, new_d}
+          true -> old
+        end
+      end)
+
+    case closest_match do
+      {nil, _} -> {:error, :not_found}
+      {id, _} -> {:ok, id}
+    end
+  end
+
+
+    @doc """
+  Resolves a role id from a query.
+
+  It checks the query for the following content:
+   - a raw id
+   - a mention
+   - a similarity search against name
+  """
+  @spec resolve_role_id(String.t(), Nostrum.Struct.Guild.t() | integer | nil) ::
+          {:error, atom} | {:ok, integer}
+
+  def resolve_role_id(query, %Nostrum.Struct.Guild{} = guild) do
+    with {:error, _} <- resolve_role_id(query, nil),
+         do: resolve_role_id_by_similarity(query, guild)
+  end
+
+  def resolve_role_id(query, nil) do
+    with {:error, _} <- resolve_role_id_by_mention(query),
+         do: resolve_role_id_by_raw_id(query)
+  end
+
+  def resolve_role_id(query, guild_id) when is_number(guild_id) do
+    resolve_role_id(query, GuildCache.get!(guild_id))
+  end
+
+  defp resolve_role_id_by_mention(query) do
+    case Regex.run(~r/<@&(\d+)>/, query) do
+      [_, id] -> {:ok, id |> String.to_integer()}
+      _ -> {:error, :not_found}
+    end
+  end
+
+  defp resolve_role_id_by_raw_id(query) do
+    case Regex.run(~r/\d+/, query) do
+      [id] -> {:ok, id |> String.to_integer()}
+      _ -> {:error, :not_found}
+    end
+  end
+
+  defp resolve_role_id_by_similarity(query, guild) do
+    closest_match =
+      Enum.reduce(guild.roles, {nil, @min_jaro}, fn {new_id, role}, {_, old_d} = old ->
+        new_d = String.jaro_distance(query |> String.downcase(), role.name |> String.downcase())
 
         cond do
           new_d > old_d -> {new_id, new_d}
@@ -224,7 +281,7 @@ defmodule UnderscoreEx.Util do
   @spec snowflake_to_unix(integer) :: integer
   def snowflake_to_unix(snowflake) do
     use Bitwise
-    round(((Nostrum.Constants.discord_epoch() + snowflake) >>> 22) / 1000)
+    round((Nostrum.Constants.discord_epoch() + (snowflake >>> 22)) / 1000)
   end
 
   @doc """

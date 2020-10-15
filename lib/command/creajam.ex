@@ -50,16 +50,31 @@ defmodule UnderscoreEx.Command.Creajam do
 
     :erlcron.cron(
       :weekly_theme_new,
-      {{:weekly, :mon, {0, :am}}, {UnderscoreEx.Command.Creajam, :new_theme, []}}
+      {{:weekly, :mon, {0, :am}}, {UnderscoreEx.Command.Creajam, :cron_new_theme, []}}
     )
 
     :erlcron.cron(
       :weekly_theme_archive,
-      {{:weekly, :sun, {11, 42, :pm}}, {UnderscoreEx.Command.Creajam, :archive_theme, []}}
+      {{:weekly, :sun, {11, 42, :pm}}, {UnderscoreEx.Command.Creajam, :cron_archive_theme, []}}
     )
   end
 
-  def generate_theme() do
+  def debug(message) do
+    now = Timex.now()
+    IO.inspect({now, now |> Timex.weekday(), message})
+  end
+
+  def cron_new_theme do
+    debug("new_theme")
+    if Timex.now() |> Timex.weekday() == 7, do: new_theme()
+  end
+
+  def cron_archive_theme do
+    debug("archive_theme")
+    if Timex.now() |> Timex.weekday() == 7, do: archive_theme()
+  end
+
+  def generate_theme do
     ["adjectives.txt", "nouns.txt"]
     |> Enum.map(fn file ->
       File.read!("./resources/#{file}") |> String.split("\n") |> Enum.random()
@@ -224,7 +239,7 @@ defmodule UnderscoreEx.Command.Creajam do
     end)
 
     guild.members
-    |> Enum.each(fn {id, %{roles: roles}} ->
+    |> Enum.map(fn {id, %{roles: roles}} ->
       if config[:participant_role] in roles do
         fn ->
           Nostrum.Api.modify_guild_member(guild.id, id,
