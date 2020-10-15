@@ -5,6 +5,8 @@ defmodule UnderscoreEx.Schema.StackItem do
   schema "stack_items" do
     field(:user_id, UnderscoreEx.EctoType.Snowflake)
     field(:content, :string)
+
+    timestamps()
   end
 
   def changeset(item, params \\ %{}) do
