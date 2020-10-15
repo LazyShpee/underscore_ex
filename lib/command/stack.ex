@@ -24,7 +24,7 @@ defmodule UnderscoreEx.Command.Stack do
       "<#{@pop_ops |> Enum.join("|")}> [index]",
       "<#{@show_ops |> Enum.join("|")}>",
       "<#{@clear_ops |> Enum.join("|")}>",
-      "<#{@edit_ops |> Enum.join("|")}>"
+      "<#{@edit_ops |> Enum.join("|")}> <index> <new content>"
     ]
 
   defp format_item({%{content: content, inserted_at: inserted_at, updated_at: update_at}, index}) do
