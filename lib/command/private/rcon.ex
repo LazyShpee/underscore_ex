@@ -54,7 +54,7 @@ defmodule UnderscoreEx.Command.Private.RCon do
           end
 
         _, "@", id ->
-          case Nostrum.Cache.UserCache.get(id |> String.to_integer()) do
+          case Nostrum.Api.get_user(id |> String.to_integer()) do
             {:ok, %{username: username}} -> "@#{username}"
             _ -> "@???"
           end

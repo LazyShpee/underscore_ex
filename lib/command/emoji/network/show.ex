@@ -30,7 +30,7 @@ defmodule UnderscoreEx.Command.Emoji.Network.Show do
       formatted_managers =
         managers
         |> Enum.map(fn m ->
-          case Nostrum.Cache.UserCache.get(m.user_id |> String.to_integer()) do
+          case Nostrum.Api.get_user(m.user_id |> String.to_integer()) do
             {:ok, user} -> " 👤 #{user.username}##{user.discriminator} (`#{user.id}`)"
             _ -> " ❔ `#{m.user_id}`"
           end

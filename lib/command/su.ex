@@ -37,7 +37,7 @@ defmodule UnderscoreEx.Command.Su do
 
   defp format_context(uid, cid, gid, _message) do
     user =
-      with {:ok, user} <- Nostrum.Cache.UserCache.get(uid) do
+      with {:ok, user} <- Nostrum.Api.get_user(uid) do
         "as #{user.username}"
       else
         _ -> "as user #{uid}"

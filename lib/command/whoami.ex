@@ -3,7 +3,7 @@ defmodule UnderscoreEx.Command.Whoami do
 
   @impl true
   def call(context, _args) do
-    user = Nostrum.Cache.UserCache.get!(context.message.author.id)
+    user = Nostrum.Api.get_user!(context.message.author.id)
 
     """
     You are : #{user.username}##{user.discriminator}

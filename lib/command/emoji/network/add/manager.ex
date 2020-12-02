@@ -11,7 +11,7 @@ defmodule UnderscoreEx.Command.Emoji.Network.Add.Manager do
   def call(context, [network_id, rest]) do
     with {:ok, user_id} <-
            UnderscoreEx.Util.resolve_user_id(rest, context.message.guild_id),
-         {:ok, user} <- Nostrum.Cache.UserCache.get(user_id),
+         {:ok, user} <- Nostrum.Api.get_user(user_id),
          %{} = network <-
            Repo.get_by(Network, %{
              name_id: network_id,

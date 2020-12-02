@@ -68,7 +68,7 @@ defmodule UnderscoreEx.Command.SysList do
   end
 
   defp format_entry(%{context_type: "user" = context_type, context_id: context_id}) do
-    case Nostrum.Cache.UserCache.get(context_id) do
+    case Nostrum.Api.get_user(context_id) do
       {:ok, user} -> "#{context_type} #{user.username}##{user.discriminator} (`#{user.id}`)"
       {:error, _} -> "#{context_type} `#{context_id}`"
     end

@@ -21,7 +21,7 @@ defmodule UnderscoreEx.Command.Emoji.Network.Remove.Manager do
            {:manager, Repo.get_by(Manager, %{user_id: "#{user_id}", network_id: network.id})},
          {:ok, _manager} <- Repo.delete(manager) do
       user =
-        case Nostrum.Cache.UserCache.get(user_id) do
+        case Nostrum.Api.get_user(user_id) do
           {:ok, %{username: username}} -> username
           _ -> "`#{user_id}`"
         end
