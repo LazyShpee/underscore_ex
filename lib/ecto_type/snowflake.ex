@@ -21,4 +21,13 @@ defmodule UnderscoreEx.EctoType.Snowflake do
   end
 
   def dump(_), do: :error
+
+  def embed_as(_) do
+    :dump
+  end
+
+  def equal?(term, term) do
+    term == term
+  end
+
 end

@@ -258,7 +258,7 @@ defmodule UnderscoreEx.Util do
         to_eval
         |> Code.eval_string(env, __ENV__)
       rescue
-        e -> {:error, e, System.stacktrace() |> hd}
+        e -> {:error, e, __STACKTRACE__ |> hd}
       end
 
     evald

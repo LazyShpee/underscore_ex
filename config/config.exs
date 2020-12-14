@@ -1,7 +1,10 @@
 import Config
 
 config :nostrum,
-  num_shards: :auto
+  num_shards: :auto,
+  gateway_intents: :all
+
+config :porcelain, driver: Porcelain.Driver.Basic
 
 config :logger, :console, metadata: [:shard]
 

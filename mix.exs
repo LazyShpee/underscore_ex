@@ -5,7 +5,7 @@ defmodule UnderscoreEx.MixProject do
     [
       app: :underscore_ex,
       version: "0.1.0",
-      elixir: "~> 1.8",
+      elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases()
@@ -30,17 +30,16 @@ defmodule UnderscoreEx.MixProject do
   defp deps do
     [
       {:nostrum, git: "https://github.com/Kraigie/nostrum.git"},
-      {:ecto_sql, "~> 3.0"},
-      {:postgrex, ">= 0.0.0"},
+      {:ecto_sql, "~> 3.5"},
+      {:postgrex, "~> 0.15"},
       {:ex_doc, "~> 0.19"},
-      {:httpoison, "~> 1.4"},
+      {:httpoison, "~> 1.7"},
       {:abacus, "~> 0.4.2"},
       {:timex, "~> 3.6"},
-      {:exredis, ">= 0.2.4"},
-      {:rambo, "~> 0.2"},
-      {:rcon, "~> 0.3.0"},
+      {:exredis, "~> 0.3"},
+      {:rambo, "~> 0.3"},
       {:erlcron, git: "https://github.com/erlware/erlcron.git"},
-      {:tzdata, "~> 1.0.1"}
+      {:tzdata, "~> 1.0"}
     ]
   end
 end
