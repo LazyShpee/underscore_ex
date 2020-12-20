@@ -26,8 +26,8 @@ defmodule UnderscoreEx.EctoType.Snowflake do
     :dump
   end
 
-  def equal?(term, term) do
-    term == term
+  def equal?(term1, term2) do
+    term1 == term2
   end
 
 end
