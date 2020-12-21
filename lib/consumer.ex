@@ -29,6 +29,7 @@ defmodule UnderscoreEx.Consumer do
     %{
       "im" => Command.IM,
       # Public commands
+      "google" => Command.Google,
       "info" => Command.Info,
       "stack" => Command.Stack,
       "text" => Command.Text,
