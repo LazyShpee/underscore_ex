@@ -28,18 +28,18 @@ defmodule UnderscoreEx.Consumer do
 
     %{
       "im" => Command.IM,
+      "su" => Command.Su,
+      "syslist" => Command.SysList,
+      "cfg" => Command.CFG,
       # Public commands
-      "google" => Command.Google,
+      "suggest" => Command.Suggest,
       "info" => Command.Info,
       "stack" => Command.Stack,
       "text" => Command.Text,
       "chrole" => Command.ChRole,
       "code" => Command.Code,
       "tio" => Command.TIO,
-      "cfg" => Command.CFG,
       "whoami" => Command.Whoami,
-      "su" => Command.Su,
-      "syslist" => Command.SysList,
       "caca" =>
         group(
           %{
