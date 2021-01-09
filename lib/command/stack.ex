@@ -66,7 +66,7 @@ defmodule UnderscoreEx.Command.Stack do
     })
     |> Repo.insert!()
 
-    "Ok bro, c'est push 🚀"
+    "Ok bro, c'est push " <> Enum.random(["🚀", "💪", "⚡", "🎖️", "🏆"])
   end
 
   # Remove
@@ -89,7 +89,7 @@ defmodule UnderscoreEx.Command.Stack do
            |> Repo.all() do
       item |> Repo.delete!()
 
-      "Yes, t'as claque #{format_item({item, n})} 👏"
+      "Yes, t'as claque #{format_item({item, n})} " <> Enum.random(["👏", "👍", "🔥", "💯", "👌"])
     else
       :error -> "Mec, donne un vrai int stp ._."
       [] -> "T'as pas autant d'items ptdr"
@@ -127,7 +127,7 @@ defmodule UnderscoreEx.Command.Stack do
            )
            |> Repo.all() do
       StackItem.changeset(item, %{content: text}) |> Repo.update!()
-      "C'est (edited) 👌"
+      "C'est (edited) " <> Enum.random(["👍", "👌"])
     else
       [] -> "T'as pas autant d'items ptdr"
       [_] -> "Il me faut un index valide et du texte, fdp"
