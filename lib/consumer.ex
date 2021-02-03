@@ -16,10 +16,12 @@ defmodule UnderscoreEx.Consumer do
 
   def my_handle_event({:MESSAGE_REACTION_ADD, data, _ws_state}) do
     UnderscoreEx.Command.Creajam.handle_reaction(:add, data)
+    UnderscoreEx.Command.Quote.handle_reaction(:add, data)
   end
 
   def my_handle_event({:MESSAGE_REACTION_REMOVE, data, _ws_state}) do
     UnderscoreEx.Command.Creajam.handle_reaction(:remove, data)
+    UnderscoreEx.Command.Quote.handle_reaction(:remove, data)
   end
 
   def my_handle_event({:READY, _, _ws_state}) do
@@ -32,6 +34,7 @@ defmodule UnderscoreEx.Consumer do
       "syslist" => Command.SysList,
       "cfg" => Command.CFG,
       # Public commands
+      "quote" => Command.Quote,
       "suggest" => Command.Suggest,
       "info" => Command.Info,
       "stack" => Command.Stack,
