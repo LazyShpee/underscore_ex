@@ -180,8 +180,7 @@ defmodule UnderscoreEx.Util do
     end
   end
 
-
-    @doc """
+  @doc """
   Resolves a role id from a query.
 
   It checks the query for the following content:
@@ -517,5 +516,44 @@ defmodule UnderscoreEx.Util do
 
   def bulk(_, _) do
     {:error, :max_iteration_reached}
+  end
+
+  @zws "\u200B"
+
+  def markdown_link_encode(info, id \\ "generic") do
+    encoded =
+      info
+      |> :http_uri.encode()
+      |> String.replace(["(", ")"], fn
+        "(" -> "%28"
+        ")" -> "%29"
+      end)
+
+    "[#{@zws}](https://ode.bz/__/#{id}/#{encoded})"
+  end
+
+  def markdown_link_decode(string) do
+    string
+    |> markdown_link_decode_raw()
+    |> Enum.map(&md_link_decode/1)
+  end
+
+  defp md_link_decode("https://ode.bz/__/" <> string) do
+    string
+    |> String.split("/")
+    |> case do
+      [id, data] -> %{id: id, data: data |> :http_uri.decode()}
+      _ -> md_link_decode(nil)
+    end
+  end
+
+  defp md_link_decode(_) do
+    %{id: "unknown", data: nil}
+  end
+
+  def markdown_link_decode_raw(string) do
+    ~r/\[#{@zws}\]\(([^\)]+)\)/
+    |> Regex.scan(string)
+    |> Enum.map(&Enum.at(&1, 1))
   end
 end

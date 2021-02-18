@@ -37,14 +37,16 @@ defmodule UnderscoreEx.Command.Quote do
   def parse_args(args), do: args
 
   @impl true
-  def call(%{message: %{author: %{id: id}}}, "") do
+  def call(%{message: %{author: %{id: id} = author}} = context, "") do
     with [{^id, %{guild_id: guild_id, channel_id: channel_id, message_id: message_id}}] <-
            :ets.lookup(:quotes, id),
-         {:ok, embed} <- make_embed(guild_id, channel_id, message_id) do
+         {:ok, embed} <- make_embed(guild_id, channel_id, message_id, author) do
       [
         embed: embed
       ]
     else
+      [] ->
+        UnderscoreEx.Command.Help.call(context, context.unaliased_call_name)
       e ->
         IO.inspect(e)
         :noop
@@ -52,26 +54,29 @@ defmodule UnderscoreEx.Command.Quote do
   end
 
   @impl true
-  def call(%{message: %{author: %{id: _id}}}, url) do
+  def call(%{message: %{author: author}} = context, url) do
     with %{"guild_id" => guild_id, "channel_id" => channel_id, "message_id" => message_id} <-
            decode_message_url(url),
          {:ok, embed} <-
            make_embed(
              guild_id |> String.to_integer(),
              channel_id |> String.to_integer(),
-             message_id |> String.to_integer()
+             message_id |> String.to_integer(),
+             author
            ) do
       [
         embed: embed
       ]
     else
+      nil ->
+        UnderscoreEx.Command.Help.call(context, context.unaliased_call_name)
       e ->
         IO.inspect(e)
         :noop
     end
   end
 
-  defp make_embed(guild_id, channel_id, message_id) do
+  defp make_embed(guild_id, channel_id, message_id, author) do
     with {:ok, message} <- Nostrum.Api.get_channel_message(channel_id, message_id) do
       import Nostrum.Struct.Embed
 
@@ -87,8 +92,9 @@ defmodule UnderscoreEx.Command.Quote do
         |> put_field(
           "Original",
           "[Jump!](#{%{message | guild_id: guild_id} |> encode_message_url()})",
-          false
+          true
         )
+        |> put_field("Quoted by", Nostrum.Struct.User.mention(author) <> UnderscoreEx.Util.markdown_link_encode("quoted_by=#{author.id}", "quote"), true)
 
       embed =
         with {:ok, %Nostrum.Struct.Guild{name: guild_name} = guild} <-
