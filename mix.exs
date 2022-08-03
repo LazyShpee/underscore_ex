@@ -39,7 +39,9 @@ defmodule UnderscoreEx.MixProject do
       {:exredis, "~> 0.3"},
       {:rambo, "~> 0.3"},
       {:erlcron, git: "https://github.com/erlware/erlcron.git"},
-      {:tzdata, "~> 1.0"}
+      {:tzdata, "~> 1.0"},
+      {:plug_cowboy, "~> 2.0"},
+      {:jason, "~> 1.2"},
     ]
   end
 end

@@ -16,6 +16,7 @@ defmodule UnderscoreEx.Application do
 
     children =
       [
+        {Plug.Cowboy, scheme: :http, plug: UnderscoreEx.Router, options: [port: cowboy_port()]},
         UnderscoreEx.Repo,
         UnderscoreEx.Core.EventRegistry,
         UnderscoreEx.Core
@@ -25,4 +26,6 @@ defmodule UnderscoreEx.Application do
     opts = [strategy: :one_for_one, name: UnderscoreEx.Supervisor]
     Supervisor.start_link(children, opts)
   end
+
+  defp cowboy_port, do: Application.get_env(:underscore_ex, :cowboy_port, 8080)
 end
