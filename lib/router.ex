@@ -3,7 +3,7 @@ defmodule UnderscoreEx.Router do
 
   # plug(CORSPlug, headers: ["*"])
   plug(Plug.Logger, log: :info)
-  plug(Plug.Parsers, parsers: [:json], pass: ["application/json"], json_decoder: Jason)
+  plug(Plug.Parsers, parsers: [:json], pass: ["application/json"], json_decoder: Poison)
   plug(:match)
   plug(:dispatch)
 
