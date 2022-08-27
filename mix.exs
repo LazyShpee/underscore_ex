@@ -37,6 +37,7 @@ defmodule UnderscoreEx.MixProject do
       {:poison, "~> 5.0"},
       {:abacus, "~> 2.0"},
       {:timex, "~> 3.7"},
+      {:jason, "~> 1.3"},
       {:exredis, "~> 0.3"},
       {:rambo, "~> 0.3"},
       {:erlcron, git: "https://github.com/erlware/erlcron.git"},

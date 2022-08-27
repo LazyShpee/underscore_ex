@@ -10,7 +10,7 @@ defmodule UnderscoreEx.Command.TIO do
   def parse_args(arg), do: arg |> String.split(" ", trim: true, parts: 2)
 
   @impl true
-  def predicates, do: [UnderscoreEx.Predicates.syslists(["tio_users"])]
+  def predicates, do: [UnderscoreEx.Predicates.syslists(["tio_users"]), UnderscoreEx.Predicates.env(:dev, :blacklist)]
 
   def usage,
     do: [

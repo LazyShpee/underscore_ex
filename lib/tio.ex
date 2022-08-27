@@ -9,20 +9,28 @@ defmodule TIO do
     update_info()
   end
 
+  def disabled() do
+    Mix.env() == :dev
+  end
+
   @spec update_info :: :ok
   def update_info() do
-    Logger.info("Getting TIO info...")
-    vars = get_info()
-    Logger.info("Getting TIO languages...")
+    if disabled() do
+      Logger.info("Dev env, skipping TIO.")
+    else
+      Logger.info("Getting TIO info...")
+      vars = get_info()
+      Logger.info("Getting TIO languages...")
 
-    {:ok, {_, _, body}} =
-      :httpc.request((vars["baseURL"] <> vars["languagesURL"]) |> String.to_charlist())
+      {:ok, {_, _, body}} =
+        :httpc.request((vars["baseURL"] <> vars["languagesURL"]) |> String.to_charlist())
 
-    langs = body |> List.to_string() |> Poison.decode!()
-    Logger.info("Found #{langs |> Map.keys() |> length()} languages.")
+      langs = body |> List.to_string() |> Poison.decode!()
+      Logger.info("Found #{langs |> Map.keys() |> length()} languages.")
 
-    :ets.insert(:tio, {:vars_cache, vars})
-    :ets.insert(:tio, {:langs_cache, langs})
+      :ets.insert(:tio, {:vars_cache, vars})
+      :ets.insert(:tio, {:langs_cache, langs})
+    end
 
     :ok
   end

@@ -4,7 +4,8 @@ config :logger,
   level: :info
 
 config :underscore_ex,
-  prefix: ">>"
+  prefix: ">>",
+  cowboy_port: 10284
 
 config :underscore_ex, Creajam,
   rendu: 684_699_851_082_039_306,

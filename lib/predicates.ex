@@ -38,6 +38,22 @@ defmodule UnderscoreEx.Predicates do
     end
   end
 
+  def env(_env, mode \\ :whitelist)
+
+  def env(env, mode) when is_list(env) do
+    fn _ctx ->
+      case Mix.env() in env do
+        true when mode == :whitelist -> :passthrough
+        false when mode == :blacklist -> :passthrough
+        _ -> {:error, "This command is disabled for this environment."}
+      end
+    end
+  end
+
+  def env(env, mode) when is_atom(env) do
+    env([env], mode)
+  end
+
   @doc """
   Check sif invoker is the bot owner.
   """
@@ -70,9 +86,7 @@ defmodule UnderscoreEx.Predicates do
 
         n ->
           Logger.warn(
-            "I'm missing #{n} key(s) to execute '#{unaliased_call_name}' configuration: #{
-              missing |> Enum.map(&elem(&1, 0)) |> Enum.join(", ")
-            }"
+            "I'm missing #{n} key(s) to execute '#{unaliased_call_name}' configuration: #{missing |> Enum.map(&elem(&1, 0)) |> Enum.join(", ")}"
           )
 
           {:error, "I'm not configured properly to do that."}
@@ -111,6 +125,11 @@ defmodule UnderscoreEx.Predicates do
     import Ecto.Query, only: [from: 2]
 
     fn %{message: %{channel_id: channel_id, guild_id: guild_id, author: %{id: user_id}}} ->
+      guild_id = if is_nil(guild_id) do
+        0
+      else
+        guild_id
+      end
       from(e in SysListEntry,
         where:
           e.list_name in ^lists and
@@ -188,9 +207,7 @@ defmodule UnderscoreEx.Predicates do
 
         _ ->
           {:error,
-           "I need need #{mode} permission(s) in: #{
-             perms |> Enum.map(&"`#{&1}`") |> Enum.join(", ")
-           }"}
+           "I need need #{mode} permission(s) in: #{perms |> Enum.map(&"`#{&1}`") |> Enum.join(", ")}"}
       end
     end
   end

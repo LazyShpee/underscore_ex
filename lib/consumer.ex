@@ -29,6 +29,7 @@ defmodule UnderscoreEx.Consumer do
     import UnderscoreEx.Core
 
     %{
+      "cerealai" => Command.Cerealai,
       "im" => Command.IM,
       "su" => Command.Su,
       "syslist" => Command.SysList,

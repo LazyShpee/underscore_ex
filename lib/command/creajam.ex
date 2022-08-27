@@ -46,17 +46,19 @@ defmodule UnderscoreEx.Command.Creajam do
   end
 
   def init do
-    Logger.info("Initialising creajam")
+    if false do
+      Logger.info("Initialising creajam")
 
-    :erlcron.cron(
-      :weekly_theme_new,
-      {{:weekly, :mon, {0, :am}}, {UnderscoreEx.Command.Creajam, :cron_new_theme, []}}
-    )
+      :erlcron.cron(
+        :weekly_theme_new,
+        {{:weekly, :mon, {0, :am}}, {UnderscoreEx.Command.Creajam, :cron_new_theme, []}}
+      )
 
-    :erlcron.cron(
-      :weekly_theme_archive,
-      {{:weekly, :sun, {11, 42, :pm}}, {UnderscoreEx.Command.Creajam, :cron_archive_theme, []}}
-    )
+      :erlcron.cron(
+        :weekly_theme_archive,
+        {{:weekly, :sun, {11, 42, :pm}}, {UnderscoreEx.Command.Creajam, :cron_archive_theme, []}}
+      )
+    end
   end
 
   def debug(message) do

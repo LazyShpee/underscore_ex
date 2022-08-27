@@ -266,9 +266,7 @@ defmodule UnderscoreEx.Util do
 
   defp eval_message({:error, e, stack}, _mode),
     do:
-      "** (#{inspect(e.__struct__)}) #{apply(e.__struct__, :message, [e])}\n\n#{inspect(e)}\n#{
-        inspect(stack)
-      }"
+      "** (#{inspect(e.__struct__)}) #{apply(e.__struct__, :message, [e])}\n\n#{inspect(e)}\n#{inspect(stack)}"
 
   defp eval_message({evald, _}, :inspect), do: "#{inspect(evald)}"
 
@@ -426,9 +424,7 @@ defmodule UnderscoreEx.Util do
         rescue
           e ->
             Logger.warn(
-              "Resuming wait loop after crash\n#{inspect(e)}\n\n#{
-                Exception.format_stacktrace(__STACKTRACE__)
-              }"
+              "Resuming wait loop after crash\n#{inspect(e)}\n\n#{Exception.format_stacktrace(__STACKTRACE__)}"
             )
 
             wait_loop(predicate, callback, timeout)
@@ -555,5 +551,21 @@ defmodule UnderscoreEx.Util do
     ~r/\[#{@zws}\]\(([^\)]+)\)/
     |> Regex.scan(string)
     |> Enum.map(&Enum.at(&1, 1))
+  end
+
+  def transform(list, fun) when is_list(list) do
+    Enum.map(list, &transform(&1, fun))
+  end
+
+  def transform(map, fun) when is_map(map) and not is_struct(map) do
+    Enum.map(map, &transform(&1, fun)) |> Map.new()
+  end
+
+  def transform({key, item}, fun) do
+    {key, transform(item, fun)}
+  end
+
+  def transform(item, fun) do
+    fun.(item)
   end
 end

@@ -11,7 +11,9 @@ defmodule UnderscoreEx.Schema.Caca do
       field(:t_start, :utc_datetime)
       field(:t_end, :utc_datetime)
       field(:imported, :boolean, default: false)
+      field(:partial, :boolean, default: false)
       field(:premium_data, :map, default: %{})
+      field(:t_upload, :utc_datetime)
 
       timestamps()
     end
@@ -24,7 +26,9 @@ defmodule UnderscoreEx.Schema.Caca do
         :t_start,
         :t_end,
         :premium_data,
-        :imported
+        :imported,
+        :t_upload,
+        :partial,
       ])
       |> Ecto.Changeset.validate_required([:user_id, :t_start, :t_end])
       |> Ecto.Changeset.check_constraint(:start, name: :start_before_end)
